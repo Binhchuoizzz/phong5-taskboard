@@ -18,6 +18,21 @@ PLANE_DIR="${PLANE_INSTALL_DIR:-/opt/plane}"
 ERRORS=0
 WARNINGS=0
 
+# Load environment variables
+if [ -f "${PLANE_DIR}/plane.env" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [[ ! "$line" =~ ^\s*# ]] && [[ "$line" =~ = ]]; then
+            export "$line"
+        fi
+    done < "${PLANE_DIR}/plane.env"
+elif [ -f "${PLANE_DIR}/.env" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [[ ! "$line" =~ ^\s*# ]] && [[ "$line" =~ = ]]; then
+            export "$line"
+        fi
+    done < "${PLANE_DIR}/.env"
+fi
+
 if docker compose version &>/dev/null; then
     DC_CMD="docker compose"
 else
@@ -70,11 +85,11 @@ else
     check_fail "Web UI not accessible (HTTP ${http_code})"
 fi
 
-api_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${PLANE_URL}/api/health/" 2>/dev/null || echo "000")
+api_code=$($DC_CMD exec -T api python3 -c "import urllib.request; print(urllib.request.urlopen('http://localhost:8000/').getcode())" 2>/dev/null || echo "000")
 if [ "$api_code" = "200" ]; then
-    check_pass "API health endpoint"
+    check_pass "API health endpoint (internal)"
 else
-    check_fail "API health endpoint (HTTP ${api_code})"
+    check_fail "API health endpoint (internal, HTTP ${api_code})"
 fi
 
 response_time=$(curl -s -o /dev/null -w "%{time_total}" --max-time 10 "${PLANE_URL}" 2>/dev/null || echo "999")
@@ -131,7 +146,7 @@ echo ""
 echo -e "${BLUE}[Database]${NC}"
 # ============================================================
 
-db_check=$($DC_CMD exec -T postgres psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
+db_check=$($DC_CMD exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
 if echo "$db_check" | grep -q "[0-9]"; then
     check_pass "PostgreSQL connection OK"
 else
@@ -139,7 +154,7 @@ else
 fi
 
 # Redis
-redis_check=$($DC_CMD exec -T redis redis-cli ping 2>/dev/null || echo "FAIL")
+redis_check=$($DC_CMD exec -T plane-redis redis-cli ping 2>/dev/null || echo "FAIL")
 if echo "$redis_check" | grep -qi "PONG"; then
     check_pass "Redis connection OK"
 else
