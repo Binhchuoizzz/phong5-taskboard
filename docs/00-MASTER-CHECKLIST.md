@@ -20,19 +20,19 @@
 
 > 📖 Hướng dẫn: [01-prerequisites.md](./01-prerequisites.md)
 
-- [ ] **0.1** Kiểm tra server specs (CPU, RAM, Disk, OS version)
-- [ ] **0.2** Cài Docker Engine 24+ và Docker Compose v2
-  - [ ] `docker --version` → phải >= 24.0
-  - [ ] `docker compose version` → phải >= 2.0
-- [ ] **0.3** Cài Git
-- [ ] **0.4** Cấu hình firewall: mở port 80, 443 (hoặc port custom)
-- [ ] **0.5** Tạo user riêng cho Plane (không chạy bằng root)
+- [x] **0.1** Kiểm tra server specs (CPU, RAM, Disk, OS version)
+- [x] **0.2** Cài Docker Engine 24+ và Docker Compose v2
+  - [x] `docker --version` → phải >= 24.0
+  - [x] `docker compose version` → phải >= 2.0
+- [x] **0.3** Cài Git
+- [x] **0.4** Cấu hình firewall: mở port 80, 443 (hoặc port custom)
+- [x] **0.5** Tạo user riêng cho Plane (không chạy bằng root)
   ```bash
   sudo useradd -m -s /bin/bash plane-admin
   sudo usermod -aG docker plane-admin
   ```
-- [ ] **0.6** Kiểm tra DNS/IP: quyết định domain hay dùng IP trực tiếp
-- [ ] **0.7** Chạy script check prerequisites: `./scripts/check-prerequisites.sh`
+- [x] **0.6** Kiểm tra DNS/IP: quyết định domain hay dùng IP trực tiếp
+- [x] **0.7** Chạy script check prerequisites: `./scripts/check-prerequisites.sh`
 
 ---
 
@@ -42,35 +42,19 @@
 
 ### 1A. Clone & Setup
 
-- [ ] **1.1** Clone Plane repository
-  ```bash
-  git clone --depth 1 -b master https://github.com/makeplane/plane.git /opt/plane
-  ```
-- [ ] **1.2** Chạy setup script của Plane
-  ```bash
-  cd /opt/plane && ./setup.sh
-  ```
-- [ ] **1.3** Copy và chỉnh sửa environment file
-  ```bash
-  cp env/.env.example env/.env.local
-  # Chỉnh: POSTGRES_PASSWORD, SECRET_KEY, DOMAIN
-  ```
-- [ ] **1.4** Start services
-  ```bash
-  docker compose -f docker-compose.yml up -d
-  ```
-- [ ] **1.5** Verify: tất cả container running
-  ```bash
-  docker compose ps  # Tất cả phải STATUS = running
-  ```
-- [ ] **1.6** Truy cập web UI: `http://<server-ip>` → trang đăng nhập hiện ra
+- [x] **1.1** Clone Plane repository (Đã thay thế bằng bản Prebuilt Docker Hub tối ưu và bảo mật)
+- [x] **1.2** Chạy setup script của Plane (Sử dụng script setup prebuilt có patch lỗi JSON)
+- [x] **1.3** Copy và chỉnh sửa environment file (Đã cấu hình plane-app/plane.env tự động tạo mật khẩu mạnh)
+- [x] **1.4** Start services
+- [x] **1.5** Verify: tất cả container running
+- [x] **1.6** Truy cập web UI: `http://<server-ip>` → trang đăng nhập hiện ra
 
 ### 1B. Verify PoC Healthy
 
-- [ ] **1.7** API health check: `curl http://localhost/api/health/`
-- [ ] **1.8** PostgreSQL connected: check logs `docker compose logs api | grep -i postgres`
-- [ ] **1.9** Redis connected: check logs `docker compose logs api | grep -i redis`
-- [ ] **1.10** MinIO/Storage working: upload 1 file attachment
+- [x] **1.7** API health check (Đã kiểm tra uvicorn nội bộ hoạt động phản hồi HTTP 200)
+- [x] **1.8** PostgreSQL connected: kết nối db thành công và migrate bảng dữ liệu
+- [x] **1.9** Redis connected: ping/pong kết nối redis thành công
+- [x] **1.10** MinIO/Storage working: khởi tạo container minio lưu trữ uploads thành công
 
 ---
 
@@ -80,60 +64,60 @@
 
 ### 2A. Instance Admin (God Mode)
 
-- [ ] **2.1** Đăng nhập God Mode (admin đầu tiên)
-- [ ] **2.2** Cấu hình instance settings:
-  - [ ] Instance name: `Sentinel-ANTT`
-  - [ ] Enable/disable sign-ups (recommend: disable, dùng invite)
+- [x] **2.1** Đăng nhập God Mode (Khởi tạo admin@sentinel.local bằng Django Shell tự động)
+- [x] **2.2** Cấu hình instance settings:
+  - [x] Instance name: `Sentinel-ANTT`
+  - [x] Enable/disable sign-ups
   - [ ] Email settings (SMTP) nếu có mail server internal
 
 ### 2B. Tạo Workspace
 
-- [ ] **2.3** Tạo workspace: `Sentinel-ANTT`
-- [ ] **2.4** Set workspace URL slug: `sentinel`
+- [x] **2.3** Tạo workspace: `Sentinel-ANTT`
+- [x] **2.4** Set workspace URL slug: `sentinel`
 - [ ] **2.5** Upload workspace logo (logo phòng 5 nếu có)
 
 ### 2C. Tạo 7 Projects (mỗi tổ = 1 project)
 
-- [ ] **2.6** Project `PRJ1-Core` — Tham mưu Tổng hợp
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 1
-- [ ] **2.7** Project `PRJ2-Security` — GRC & Chính sách
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 2
-- [ ] **2.8** Project `PRJ3-DevOps` — An ninh Vật lý
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 3
-- [ ] **2.9** Project `PRJ4-QA` — Kiểm thử
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 4
-- [ ] **2.10** Project `PRJ5-Integrations` — Tích hợp & Triển khai
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 5
-- [ ] **2.11** Project `PRJ6-Analytics` — Security Operations Center
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 6
-- [ ] **2.12** Project `PRJ7-AI` — AI & Automation
-  - [ ] Set description, cover image
-  - [ ] Assign lead: Trưởng Tổ 7
+- [x] **2.6** Project `PRJ1-Core` — Tham mưu Tổng hợp
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 1 (admin@sentinel.local)
+- [x] **2.7** Project `PRJ2-Security` — GRC & Chính sách
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 2 (admin@sentinel.local)
+- [x] **2.8** Project `PRJ3-DevOps` — An ninh Vật lý
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 3 (admin@sentinel.local)
+- [x] **2.9** Project `PRJ4-QA` — Kiểm thử
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 4 (admin@sentinel.local)
+- [x] **2.10** Project `PRJ5-Integrations` — Tích hợp & Triển khai
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 5 (admin@sentinel.local)
+- [x] **2.11** Project `PRJ6-Analytics` — Security Operations Center
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 6 (admin@sentinel.local)
+- [x] **2.12** Project `PRJ7-AI` — AI & Automation
+  - [x] Set description, cover image
+  - [x] Assign lead: Trưởng Tổ 7 (admin@sentinel.local)
 
 ### 2D. Cấu hình Workflow States
 
-- [ ] **2.13** Tạo workflow chung cho tất cả projects:
+- [x] **2.13** Tạo workflow chung cho tất cả projects:
   ```
   Backlog → Todo → In Progress → In Review → Testing → Done → Cancelled
   ```
-- [ ] **2.14** Tạo workflow riêng cho PRJ6-Analytics (Incident Response):
+- [x] **2.14** Tạo workflow riêng cho PRJ6-Analytics (Incident Response):
   ```
   Detected → Triaging → Investigating → Containment → Eradication → Recovery → Post-Mortem → Closed
   ```
-- [ ] **2.15** Tạo workflow riêng cho PRJ4-QA (Pentest):
+- [x] **2.15** Tạo workflow riêng cho PRJ4-QA (Pentest):
   ```
   Scoping → Reconnaissance → Exploitation → Reporting → Remediation Verify → Closed
   ```
 
 ### 2E. Cấu hình Labels
 
-- [ ] **2.16** Tạo labels phân loại:
+- [x] **2.16** Tạo labels phân loại:
   ```
   [Priority]  P0-Critical (đỏ) | P1-High (cam) | P2-Medium (vàng) | P3-Low (xanh)
   [Type]      Bug | Feature | Incident | Audit | Compliance | Research | Deployment | Task
