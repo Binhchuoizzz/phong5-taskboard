@@ -16,6 +16,12 @@ PLANE_DIR="${PLANE_INSTALL_DIR:-/opt/plane}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
+if docker compose version &>/dev/null; then
+    DC_CMD="docker compose"
+else
+    DC_CMD="docker-compose"
+fi
+
 echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║      Plane PoC Deployment Script             ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
@@ -66,13 +72,13 @@ echo ""
 
 # Step 4: Pull images
 echo -e "${BLUE}[4/6] Pulling Docker images...${NC}"
-docker compose pull
+$DC_CMD pull
 echo -e "${GREEN}  ✅ Images pulled${NC}"
 echo ""
 
 # Step 5: Start services
 echo -e "${BLUE}[5/6] Starting Plane services...${NC}"
-docker compose up -d
+$DC_CMD up -d
 echo ""
 
 # Wait for services to start
@@ -84,8 +90,8 @@ echo -e "${BLUE}[6/6] Verifying deployment...${NC}"
 echo ""
 
 ALL_OK=true
-for svc in $(docker compose ps --services); do
-    status=$(docker compose ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
+for svc in $($DC_CMD ps --services); do
+    status=$($DC_CMD ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
     if echo "$status" | grep -qi "running\|up"; then
         echo -e "  ${GREEN}✅ ${svc}: running${NC}"
     else
@@ -111,6 +117,6 @@ if [ "$ALL_OK" = true ]; then
     echo ""
 else
     echo -e "${RED}Some services failed to start. Check logs:${NC}"
-    echo "  docker compose logs -f"
+    echo "  $DC_CMD logs -f"
     exit 1
 fi

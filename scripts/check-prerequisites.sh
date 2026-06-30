@@ -74,9 +74,12 @@ fi
 
 if docker compose version &>/dev/null; then
     COMPOSE_VERSION=$(docker compose version --short 2>/dev/null || docker compose version | grep -oP '\d+\.\d+' | head -1)
-    check_pass "Docker Compose ${COMPOSE_VERSION}"
+    check_pass "Docker Compose ${COMPOSE_VERSION} (docker compose)"
+elif docker-compose version &>/dev/null; then
+    COMPOSE_VERSION=$(docker-compose version --short 2>/dev/null || docker-compose version | grep -oP '\d+\.\d+' | head -1)
+    check_pass "Docker Compose ${COMPOSE_VERSION} (docker-compose)"
 else
-    check_fail "Docker Compose not installed (need v2 plugin)"
+    check_fail "Docker Compose not installed (need v2 plugin or standalone)"
 fi
 
 # Check docker daemon running

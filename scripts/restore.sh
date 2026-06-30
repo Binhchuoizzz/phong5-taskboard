@@ -10,6 +10,12 @@ set -euo pipefail
 BACKUP_FILE="${1:?Usage: ./scripts/restore.sh <backup-file.tar.gz>}"
 PLANE_DIR="${PLANE_INSTALL_DIR:-/opt/plane}"
 
+if docker compose version &>/dev/null; then
+    DC_CMD="docker compose"
+else
+    DC_CMD="docker-compose"
+fi
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -48,18 +54,18 @@ echo -e "  ${GREEN}✅ Extracted: ${BACKUP_NAME}${NC}"
 # 2. Stop app services (keep DB running)
 echo -e "${BLUE}[2/5] Stopping Plane services...${NC}"
 cd "${PLANE_DIR}"
-docker compose stop api web worker beat proxy 2>/dev/null || true
+$DC_CMD stop api web worker beat proxy 2>/dev/null || true
 echo -e "  ${GREEN}✅ Services stopped${NC}"
 
 # 3. Restore PostgreSQL
 echo -e "${BLUE}[3/5] Restoring PostgreSQL...${NC}"
 if [ -f "${TEMP_DIR}/${BACKUP_NAME}/database.dump" ]; then
     # Drop and recreate database
-    docker compose exec -T postgres psql -U plane -d postgres -c "DROP DATABASE IF EXISTS plane;" 2>/dev/null || true
-    docker compose exec -T postgres psql -U plane -d postgres -c "CREATE DATABASE plane;" 2>/dev/null || true
+    $DC_CMD exec -T postgres psql -U plane -d postgres -c "DROP DATABASE IF EXISTS plane;" 2>/dev/null || true
+    $DC_CMD exec -T postgres psql -U plane -d postgres -c "CREATE DATABASE plane;" 2>/dev/null || true
 
     # Restore
-    docker compose exec -T postgres \
+    $DC_CMD exec -T postgres \
         pg_restore -U plane -d plane --no-owner --no-privileges \
         < "${TEMP_DIR}/${BACKUP_NAME}/database.dump"
     echo -e "  ${GREEN}✅ Database restored${NC}"
@@ -71,7 +77,7 @@ fi
 # 4. Restore MinIO
 echo -e "${BLUE}[4/5] Restoring MinIO storage...${NC}"
 if [ -f "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" ] && [ -s "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" ]; then
-    docker compose exec -T minio \
+    $DC_CMD exec -T minio \
         tar xzf - -C / \
         < "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
     echo -e "  ${GREEN}✅ MinIO data restored${NC}"
@@ -81,15 +87,15 @@ fi
 
 # 5. Restart all services
 echo -e "${BLUE}[5/5] Restarting Plane...${NC}"
-docker compose up -d
+$DC_CMD up -d
 sleep 15
 
 # Verify
 echo ""
 echo "Verifying services..."
 ALL_OK=true
-for svc in $(docker compose ps --services); do
-    status=$(docker compose ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
+for svc in $($DC_CMD ps --services); do
+    status=$($DC_CMD ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
     if echo "$status" | grep -qi "running\|up"; then
         echo -e "  ${GREEN}✅ ${svc}${NC}"
     else
@@ -106,6 +112,6 @@ if [ "$ALL_OK" = true ]; then
     echo "  2. Login with existing credentials"
     echo "  3. Check issues, projects, and file attachments"
 else
-    echo -e "${RED}Some services failed. Check: docker compose logs -f${NC}"
+    echo -e "${RED}Some services failed. Check: $DC_CMD logs -f${NC}"
     exit 1
 fi

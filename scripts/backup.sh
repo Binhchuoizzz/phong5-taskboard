@@ -14,6 +14,12 @@ BACKUP_DIR="${BACKUP_BASE_DIR}/${BACKUP_TYPE}"
 BACKUP_NAME="plane-backup-${TIMESTAMP}"
 PLANE_DIR="${PLANE_INSTALL_DIR:-/opt/plane}"
 
+if docker compose version &>/dev/null; then
+    DC_CMD="docker compose"
+else
+    DC_CMD="docker-compose"
+fi
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -29,7 +35,7 @@ mkdir -p "${BACKUP_DIR}/${BACKUP_NAME}"
 
 # 1. Backup PostgreSQL
 echo -e "${BLUE}[1/4] Backing up PostgreSQL...${NC}"
-if docker compose -f "${PLANE_DIR}/docker-compose.yml" exec -T postgres \
+if $DC_CMD -f "${PLANE_DIR}/docker-compose.yml" exec -T postgres \
     pg_dump -U plane -d plane --format=custom --compress=9 \
     > "${BACKUP_DIR}/${BACKUP_NAME}/database.dump" 2>/dev/null; then
     SIZE=$(du -sh "${BACKUP_DIR}/${BACKUP_NAME}/database.dump" | cut -f1)
@@ -41,9 +47,9 @@ fi
 
 # 2. Backup MinIO data
 echo -e "${BLUE}[2/4] Backing up MinIO storage...${NC}"
-MINIO_DATA=$(docker compose -f "${PLANE_DIR}/docker-compose.yml" exec -T minio ls /data 2>/dev/null)
+MINIO_DATA=$($DC_CMD -f "${PLANE_DIR}/docker-compose.yml" exec -T minio ls /data 2>/dev/null)
 if [ -n "$MINIO_DATA" ]; then
-    docker compose -f "${PLANE_DIR}/docker-compose.yml" exec -T minio \
+    $DC_CMD -f "${PLANE_DIR}/docker-compose.yml" exec -T minio \
         tar czf - /data 2>/dev/null \
         > "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
     SIZE=$(du -sh "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" | cut -f1)

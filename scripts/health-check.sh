@@ -18,6 +18,12 @@ PLANE_DIR="${PLANE_INSTALL_DIR:-/opt/plane}"
 ERRORS=0
 WARNINGS=0
 
+if docker compose version &>/dev/null; then
+    DC_CMD="docker compose"
+else
+    DC_CMD="docker-compose"
+fi
+
 check_pass() {
     echo -e "  ${GREEN}✅ PASS${NC} — $1"
 }
@@ -44,8 +50,8 @@ echo -e "${BLUE}[Containers]${NC}"
 # ============================================================
 cd "${PLANE_DIR}" 2>/dev/null || true
 
-for svc in $(docker compose ps --services 2>/dev/null); do
-    status=$(docker compose ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
+for svc in $($DC_CMD ps --services 2>/dev/null); do
+    status=$($DC_CMD ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
     if echo "$status" | grep -qi "running\|up"; then
         check_pass "Container: ${svc}"
     else
@@ -125,7 +131,7 @@ echo ""
 echo -e "${BLUE}[Database]${NC}"
 # ============================================================
 
-db_check=$(docker compose exec -T postgres psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
+db_check=$($DC_CMD exec -T postgres psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
 if echo "$db_check" | grep -q "[0-9]"; then
     check_pass "PostgreSQL connection OK"
 else
@@ -133,7 +139,7 @@ else
 fi
 
 # Redis
-redis_check=$(docker compose exec -T redis redis-cli ping 2>/dev/null || echo "FAIL")
+redis_check=$($DC_CMD exec -T redis redis-cli ping 2>/dev/null || echo "FAIL")
 if echo "$redis_check" | grep -qi "PONG"; then
     check_pass "Redis connection OK"
 else
@@ -151,7 +157,7 @@ elif [ $ERRORS -eq 0 ]; then
     echo -e "  ${YELLOW}${WARNINGS} warning(s), but no critical issues.${NC}"
 else
     echo -e "  ${RED}${ERRORS} FAILED check(s), ${WARNINGS} warning(s).${NC}"
-    echo "  Check logs: docker compose logs -f"
+    echo "  Check logs: $DC_CMD logs -f"
 fi
 echo -e "${BLUE}══════════════════════════════════════════════${NC}"
 
