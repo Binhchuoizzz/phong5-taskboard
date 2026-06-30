@@ -35,50 +35,16 @@ if ! bash "${SCRIPT_DIR}/check-prerequisites.sh"; then
 fi
 echo ""
 
-# Step 2: Clone Plane
-echo -e "${BLUE}[2/6] Cloning Plane repository...${NC}"
-if [ -d "${PLANE_DIR}" ] && [ "$(ls -A ${PLANE_DIR})" ]; then
-    echo -e "${YELLOW}  Directory ${PLANE_DIR} already exists.${NC}"
-    if [ -w "${PLANE_DIR}" ]; then
-        rm -rf "${PLANE_DIR}"
-    else
-        # Fallback to sudo if not writable
-        read -p "  Overwrite using sudo? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            sudo rm -rf "${PLANE_DIR}"
-        else
-            echo "  Skipping clone, using existing directory."
-        fi
-    fi
-fi
+# Step 2: Configure Environment
+echo -e "${BLUE}[2/6] Configuring Environment variables...${NC}"
+PLANE_APP_DIR="${PROJECT_DIR}/plane-app"
+mkdir -p "${PLANE_APP_DIR}"
 
-if [ ! -d "${PLANE_DIR}" ] || [ -z "$(ls -A ${PLANE_DIR} 2>/dev/null)" ]; then
-    PARENT_DIR=$(dirname "${PLANE_DIR}")
-    if [ -w "${PARENT_DIR}" ] || [ -w "${PLANE_DIR}" 2>/dev/null ]; then
-        mkdir -p "${PLANE_DIR}"
-    else
-        sudo mkdir -p "${PLANE_DIR}"
-        sudo chown $(whoami):$(whoami) "${PLANE_DIR}"
-    fi
-    git clone --depth 1 -b master https://github.com/makeplane/plane.git "${PLANE_DIR}"
-    echo -e "${GREEN}  ✅ Cloned to ${PLANE_DIR}${NC}"
-fi
-echo ""
-
-# Step 3: Setup
-echo -e "${BLUE}[3/6] Running Plane setup...${NC}"
-cd "${PLANE_DIR}"
-
-# Configure environment files
-if [ -f "${PROJECT_DIR}/env/.env.local" ]; then
-    echo -e "${YELLOW}  Found custom .env.local — running setup helper...${NC}"
-    python3 "${PROJECT_DIR}/scripts/setup-plane-envs.py"
-else
-    echo -e "${YELLOW}  No custom .env.local found. Creating one from template...${NC}"
+if [ ! -f "${PROJECT_DIR}/env/.env.local" ]; then
+    echo -e "${YELLOW}  Creating fresh env/.env.local from template...${NC}"
     cp "${PROJECT_DIR}/env/.env.example" "${PROJECT_DIR}/env/.env.local"
     python3 -c "
-import secrets, os
+import secrets
 local_env = '${PROJECT_DIR}/env/.env.local'
 with open(local_env, 'r') as f:
     content = f.read()
@@ -87,57 +53,83 @@ content = content.replace('CHANGE_ME_64_CHARS_RANDOM_STRING', secrets.token_hex(
 with open(local_env, 'w') as f:
     f.write(content)
 "
-    python3 "${PROJECT_DIR}/scripts/setup-plane-envs.py"
 fi
+
+# Run helper to generate plane-app/plane.env with URLs
+python3 "${PROJECT_DIR}/scripts/setup-plane-app-env.py"
+echo -e "${GREEN}  ✅ plane-app/plane.env updated.${NC}"
 echo ""
 
-# Step 4: Pull images
-echo -e "${BLUE}[4/6] Pulling Docker images...${NC}"
-$DC_CMD pull
-echo -e "${GREEN}  ✅ Images pulled${NC}"
+# Step 3: Setup Shared Docker Network
+echo -e "${BLUE}[3/6] Configuring Shared External Network...${NC}"
+docker network create plane-network 2>/dev/null || true
+echo -e "${GREEN}  ✅ External Network 'plane-network' ready.${NC}"
 echo ""
 
-# Step 5: Start services
-echo -e "${BLUE}[5/6] Starting Plane services...${NC}"
-$DC_CMD up -d
+# Step 4: Pull Docker Images
+echo -e "${BLUE}[4/6] Pulling images for all decoupled stacks...${NC}"
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.db.yaml" --env-file "${PLANE_APP_DIR}/plane.env" pull -q
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" pull -q
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.proxy.yaml" --env-file "${PLANE_APP_DIR}/plane.env" pull -q
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.monitor.yaml" --env-file "${PLANE_APP_DIR}/plane.env" pull -q
+echo -e "${GREEN}  ✅ All images pulled.${NC}"
 echo ""
 
-# Wait for services to start
-echo "  Waiting 30 seconds for services to initialize..."
-sleep 30
+# Step 5: Start Decoupled Stacks Sequentially
+echo -e "${BLUE}[5/6] Starting decoupled service stacks...${NC}"
 
-# Step 6: Verify
-echo -e "${BLUE}[6/6] Verifying deployment...${NC}"
+# A. Start Backing Database Tier
+echo -e "  Starting Database Stack..."
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.db.yaml" --env-file "${PLANE_APP_DIR}/plane.env" up -d
+echo "  Waiting 15 seconds for Database Services (Postgres, Redis, MQ) to be ready..."
+sleep 15
+
+# B. Run Data Migration
+echo -e "  Running Database Migrations..."
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" run --rm migrator
+echo -e "${GREEN}  ✅ Migrations complete.${NC}"
+
+# C. Start Application Stack
+echo -e "  Starting Core Application Stack..."
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" up -d
+echo "  Waiting 10 seconds for Application API to boot..."
+sleep 10
+
+# D. Start Proxy and Monitor Stack
+echo -e "  Starting Reverse Proxy & Monitoring Stacks..."
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.proxy.yaml" --env-file "${PLANE_APP_DIR}/plane.env" up -d
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.monitor.yaml" --env-file "${PLANE_APP_DIR}/plane.env" up -d
 echo ""
 
-ALL_OK=true
-for svc in $($DC_CMD ps --services); do
-    status=$($DC_CMD ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
-    if echo "$status" | grep -qi "running\|up"; then
-        echo -e "  ${GREEN}✅ ${svc}: running${NC}"
-    else
-        echo -e "  ${RED}❌ ${svc}: ${status}${NC}"
-        ALL_OK=false
-    fi
-done
+# Step 6: Seeding & Verification
+echo -e "${BLUE}[6/6] Seeding Workspace & Verifying Health...${NC}"
+echo ""
+
+# Database seeding
+echo "  Running initialize-plane-data.py seeding script..."
+$DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" exec -T api python manage.py shell < "${PROJECT_DIR}/scripts/initialize-plane-data.py"
+echo ""
+
+# Run health checks
+echo "  Running health-check.sh..."
+PLANE_INSTALL_DIR="${PLANE_APP_DIR}" bash "${PROJECT_DIR}/scripts/health-check.sh"
+HEALTH_CHECK_STATUS=$?
 
 echo ""
-if [ "$ALL_OK" = true ]; then
-    # Get server IP
+if [ $HEALTH_CHECK_STATUS -eq 0 ]; then
     SERVER_IP=$(hostname -I | awk '{print $1}')
     echo -e "${GREEN}╔══════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║         Plane deployed successfully!          ║${NC}"
+    echo -e "${GREEN}║   Decoupled Plane deployed successfully!    ║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "  🌐 Access Plane: ${BLUE}http://${SERVER_IP}${NC}"
+    echo -e "  🌐 Web Access (Port 80):    ${BLUE}http://${SERVER_IP}${NC}"
+    echo -e "  📊 Monitoring (Grafana):   ${BLUE}http://${SERVER_IP}:3001${NC}"
     echo ""
-    echo "  Next steps:"
-    echo "  1. Open the URL above in your browser"
-    echo "  2. Create your admin account"
-    echo "  3. Follow docs/03-configuration.md to setup workspace"
+    echo "  Login Credentials (God Mode Admin):"
+    echo "  - Email:    admin@sentinel.local"
+    echo "  - Password: Sentinel@123"
     echo ""
 else
-    echo -e "${RED}Some services failed to start. Check logs:${NC}"
-    echo "  $DC_CMD logs -f"
+    echo -e "${RED}Health check failed. Check docker container logs for errors.${NC}"
     exit 1
 fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# Plane Backup Script
+# Plane Backup Script (Decoupled Stack Support)
 # Backs up PostgreSQL, MinIO storage, and configs
 # Usage: ./scripts/backup.sh [daily|weekly|monthly]
 # ============================================================
@@ -30,12 +30,24 @@ echo "Type: ${BACKUP_TYPE}"
 echo "Time: $(date)"
 echo ""
 
+# Load environment variables to read postgres password
+if [ -f "${PLANE_DIR}/plane.env" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [[ ! "$line" =~ ^\s*# ]] && [[ "$line" =~ = ]]; then
+            export "$line"
+        fi
+    done < "${PLANE_DIR}/plane.env"
+fi
+
+# Decoupled stack command
+DC_DB="$DC_CMD -f ${PLANE_DIR}/docker-compose.db.yaml --env-file=${PLANE_DIR}/plane.env"
+
 # Create backup directory
 mkdir -p "${BACKUP_DIR}/${BACKUP_NAME}"
 
 # 1. Backup PostgreSQL
 echo -e "${BLUE}[1/4] Backing up PostgreSQL...${NC}"
-if $DC_CMD -f "${PLANE_DIR}/docker-compose.yml" exec -T postgres \
+if $DC_DB exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db \
     pg_dump -U plane -d plane --format=custom --compress=9 \
     > "${BACKUP_DIR}/${BACKUP_NAME}/database.dump" 2>/dev/null; then
     SIZE=$(du -sh "${BACKUP_DIR}/${BACKUP_NAME}/database.dump" | cut -f1)
@@ -47,10 +59,11 @@ fi
 
 # 2. Backup MinIO data
 echo -e "${BLUE}[2/4] Backing up MinIO storage...${NC}"
-MINIO_DATA=$($DC_CMD -f "${PLANE_DIR}/docker-compose.yml" exec -T minio ls /data 2>/dev/null)
+# MinIO prebuilt stores in /export
+MINIO_DATA=$($DC_DB exec -T plane-minio ls /export 2>/dev/null)
 if [ -n "$MINIO_DATA" ]; then
-    $DC_CMD -f "${PLANE_DIR}/docker-compose.yml" exec -T minio \
-        tar czf - /data 2>/dev/null \
+    $DC_DB exec -T plane-minio \
+        tar czf - /export 2>/dev/null \
         > "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
     SIZE=$(du -sh "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" | cut -f1)
     echo -e "  ${GREEN}✅ MinIO: ${SIZE}${NC}"
@@ -62,8 +75,11 @@ fi
 # 3. Backup configs
 echo -e "${BLUE}[3/4] Backing up configurations...${NC}"
 mkdir -p "${BACKUP_DIR}/${BACKUP_NAME}/config"
-cp "${PLANE_DIR}/.env" "${BACKUP_DIR}/${BACKUP_NAME}/config/env.backup" 2>/dev/null || true
-cp "${PLANE_DIR}/docker-compose.yml" "${BACKUP_DIR}/${BACKUP_NAME}/config/docker-compose.yml.backup" 2>/dev/null || true
+cp "${PLANE_DIR}/plane.env" "${BACKUP_DIR}/${BACKUP_NAME}/config/plane.env.backup" 2>/dev/null || true
+cp "${PLANE_DIR}/docker-compose.db.yaml" "${BACKUP_DIR}/${BACKUP_NAME}/config/docker-compose.db.yaml.backup" 2>/dev/null || true
+cp "${PLANE_DIR}/docker-compose.app.yaml" "${BACKUP_DIR}/${BACKUP_NAME}/config/docker-compose.app.yaml.backup" 2>/dev/null || true
+cp "${PLANE_DIR}/docker-compose.proxy.yaml" "${BACKUP_DIR}/${BACKUP_NAME}/config/docker-compose.proxy.yaml.backup" 2>/dev/null || true
+cp "${PLANE_DIR}/docker-compose.monitor.yaml" "${BACKUP_DIR}/${BACKUP_NAME}/config/docker-compose.monitor.yaml.backup" 2>/dev/null || true
 echo -e "  ${GREEN}✅ Configs backed up${NC}"
 
 # 4. Create archive

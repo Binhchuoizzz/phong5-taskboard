@@ -1,0 +1,169 @@
+version: '3.8'
+
+services:
+  web:
+    image: makeplane/plane-frontend:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-web-1
+    restart: always
+    env_file:
+      - plane.env
+    networks:
+      - default
+
+  space:
+    image: makeplane/plane-space:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-space-1
+    restart: always
+    env_file:
+      - plane.env
+    networks:
+      - default
+
+  admin:
+    image: makeplane/plane-admin:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-admin-1
+    restart: always
+    env_file:
+      - plane.env
+    networks:
+      - default
+
+  live:
+    image: makeplane/plane-live:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-live-1
+    restart: always
+    env_file:
+      - plane.env
+    environment:
+      # Real-time websocket specific vars
+      LIVE_SERVER_SECRET_KEY: ${LIVE_SERVER_SECRET_KEY}
+      REDIS_HOST: ${REDIS_HOST:-plane-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
+    networks:
+      - default
+
+  api:
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-api-1
+    command: ./bin/docker-entrypoint-api.sh
+    restart: always
+    volumes:
+      - logs_api:/code/plane/logs
+    env_file:
+      - plane.env
+    environment:
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-1}
+      # Re-map explicit default anchors if missing from environment
+      PGHOST: ${PGHOST:-plane-db}
+      PGDATABASE: ${PGDATABASE:-plane}
+      POSTGRES_USER: ${POSTGRES_USER:-plane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
+      POSTGRES_DB: ${POSTGRES_DB:-plane}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      REDIS_HOST: ${REDIS_HOST:-plane-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-plane}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-plane}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
+    networks:
+      - default
+
+  worker:
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-worker-1
+    command: ./bin/docker-entrypoint-worker.sh
+    restart: always
+    volumes:
+      - logs_worker:/code/plane/logs
+    env_file:
+      - plane.env
+    environment:
+      PGHOST: ${PGHOST:-plane-db}
+      PGDATABASE: ${PGDATABASE:-plane}
+      POSTGRES_USER: ${POSTGRES_USER:-plane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
+      POSTGRES_DB: ${POSTGRES_DB:-plane}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      REDIS_HOST: ${REDIS_HOST:-plane-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-plane}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-plane}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
+    networks:
+      - default
+
+  beat-worker:
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-beat-worker-1
+    command: ./bin/docker-entrypoint-beat.sh
+    restart: always
+    volumes:
+      - logs_beat-worker:/code/plane/logs
+    env_file:
+      - plane.env
+    environment:
+      PGHOST: ${PGHOST:-plane-db}
+      PGDATABASE: ${PGDATABASE:-plane}
+      POSTGRES_USER: ${POSTGRES_USER:-plane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
+      POSTGRES_DB: ${POSTGRES_DB:-plane}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      REDIS_HOST: ${REDIS_HOST:-plane-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-plane}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-plane}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
+    networks:
+      - default
+
+  migrator:
+    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    container_name: plane-app-migrator-1
+    command: ./bin/docker-entrypoint-migrator.sh
+    restart: on-failure
+    volumes:
+      - logs_migrator:/code/plane/logs
+    env_file:
+      - plane.env
+    environment:
+      PGHOST: ${PGHOST:-plane-db}
+      PGDATABASE: ${PGDATABASE:-plane}
+      POSTGRES_USER: ${POSTGRES_USER:-plane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
+      POSTGRES_DB: ${POSTGRES_DB:-plane}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      REDIS_HOST: ${REDIS_HOST:-plane-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-plane}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-plane}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
+    networks:
+      - default
+
+volumes:
+  logs_api:
+  logs_worker:
+  logs_beat-worker:
+  logs_migrator:
+
+networks:
+  default:
+    name: plane-network
+    external: true

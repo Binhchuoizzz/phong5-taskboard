@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: plane-monitor-prometheus
+    restart: always
+    volumes:
+      - /home/binhchuoiz/Projects/Personal/NoteAppC12/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - 9090:9090
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: plane-monitor-grafana
+    restart: always
+    ports:
+      - 3001:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - default
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: plane-monitor-node-exporter
+    restart: always
+    ports:
+      - 9100:9100
+    networks:
+      - default
+
+
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: plane-network
+    external: true

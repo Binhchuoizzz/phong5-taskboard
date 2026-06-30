@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# Plane Restore Script
+# Plane Restore Script (Decoupled Stack Support)
 # Restores PostgreSQL and MinIO from backup archive
 # Usage: ./scripts/restore.sh /path/to/plane-backup-XXXXXXXX.tar.gz
 # ============================================================
@@ -42,6 +42,21 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
+# Load environment variables to read postgres password
+if [ -f "${PLANE_DIR}/plane.env" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [[ ! "$line" =~ ^\s*# ]] && [[ "$line" =~ = ]]; then
+            export "$line"
+        fi
+    done < "${PLANE_DIR}/plane.env"
+fi
+
+# Decoupled stack commands
+DC_DB="$DC_CMD -f ${PLANE_DIR}/docker-compose.db.yaml --env-file=${PLANE_DIR}/plane.env"
+DC_APP="$DC_CMD -f ${PLANE_DIR}/docker-compose.app.yaml --env-file=${PLANE_DIR}/plane.env"
+DC_PROXY="$DC_CMD -f ${PLANE_DIR}/docker-compose.proxy.yaml --env-file=${PLANE_DIR}/plane.env"
+DC_MONITOR="$DC_CMD -f ${PLANE_DIR}/docker-compose.monitor.yaml --env-file=${PLANE_DIR}/plane.env"
+
 TEMP_DIR=$(mktemp -d)
 trap "rm -rf ${TEMP_DIR}" EXIT
 
@@ -51,33 +66,33 @@ tar xzf "${BACKUP_FILE}" -C "${TEMP_DIR}"
 BACKUP_NAME=$(ls "${TEMP_DIR}" | head -1)
 echo -e "  ${GREEN}✅ Extracted: ${BACKUP_NAME}${NC}"
 
-# 2. Stop app services (keep DB running)
-echo -e "${BLUE}[2/5] Stopping Plane services...${NC}"
-cd "${PLANE_DIR}"
-$DC_CMD stop api web worker beat proxy 2>/dev/null || true
+# 2. Stop application services (keep DB running)
+echo -e "${BLUE}[2/5] Stopping Plane application and proxy services...${NC}"
+$DC_PROXY stop 2>/dev/null || true
+$DC_APP stop 2>/dev/null || true
 echo -e "  ${GREEN}✅ Services stopped${NC}"
 
 # 3. Restore PostgreSQL
 echo -e "${BLUE}[3/5] Restoring PostgreSQL...${NC}"
 if [ -f "${TEMP_DIR}/${BACKUP_NAME}/database.dump" ]; then
     # Drop and recreate database
-    $DC_CMD exec -T postgres psql -U plane -d postgres -c "DROP DATABASE IF EXISTS plane;" 2>/dev/null || true
-    $DC_CMD exec -T postgres psql -U plane -d postgres -c "CREATE DATABASE plane;" 2>/dev/null || true
+    $DC_DB exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db psql -U plane -d postgres -c "DROP DATABASE IF EXISTS plane;" 2>/dev/null || true
+    $DC_DB exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db psql -U plane -d postgres -c "CREATE DATABASE plane;" 2>/dev/null || true
 
     # Restore
-    $DC_CMD exec -T postgres \
+    $DC_DB exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db \
         pg_restore -U plane -d plane --no-owner --no-privileges \
         < "${TEMP_DIR}/${BACKUP_NAME}/database.dump"
     echo -e "  ${GREEN}✅ Database restored${NC}"
 else
-    echo -e "  ${RED}❌ database.dump not found in backup${NC}"
+    echo -e "${RED}❌ database.dump not found in backup${NC}"
     exit 1
 fi
 
 # 4. Restore MinIO
 echo -e "${BLUE}[4/5] Restoring MinIO storage...${NC}"
 if [ -f "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" ] && [ -s "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" ]; then
-    $DC_CMD exec -T minio \
+    $DC_DB exec -T plane-minio \
         tar xzf - -C / \
         < "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
     echo -e "  ${GREEN}✅ MinIO data restored${NC}"
@@ -86,32 +101,27 @@ else
 fi
 
 # 5. Restart all services
-echo -e "${BLUE}[5/5] Restarting Plane...${NC}"
-$DC_CMD up -d
-sleep 15
+echo -e "${BLUE}[5/5] Restarting Plane services...${NC}"
+$DC_DB up -d
+$DC_APP up -d
+$DC_PROXY up -d
+$DC_MONITOR up -d
+sleep 10
 
 # Verify
 echo ""
 echo "Verifying services..."
-ALL_OK=true
-for svc in $($DC_CMD ps --services); do
-    status=$($DC_CMD ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
-    if echo "$status" | grep -qi "running\|up"; then
-        echo -e "  ${GREEN}✅ ${svc}${NC}"
-    else
-        echo -e "  ${RED}❌ ${svc}: ${status}${NC}"
-        ALL_OK=false
-    fi
-done
+PLANE_INSTALL_DIR="${PLANE_DIR}" bash "${PLANE_DIR}/../scripts/health-check.sh"
+HEALTH_CHECK_STATUS=$?
 
 echo ""
-if [ "$ALL_OK" = true ]; then
+if [ $HEALTH_CHECK_STATUS -eq 0 ]; then
     echo -e "${GREEN}=== Restore Complete ===${NC}"
     echo "Please verify:"
-    echo "  1. Open http://<server-ip> in browser"
+    echo "  1. Open http://localhost in browser"
     echo "  2. Login with existing credentials"
     echo "  3. Check issues, projects, and file attachments"
 else
-    echo -e "${RED}Some services failed. Check: $DC_CMD logs -f${NC}"
+    echo -e "${RED}Some services failed. Check container statuses.${NC}"
     exit 1
 fi

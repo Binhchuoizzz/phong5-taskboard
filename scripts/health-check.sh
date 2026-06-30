@@ -1,7 +1,6 @@
 #!/bin/bash
 # ============================================================
-# Plane Health Check Script
-# Checks all services, resources, and connectivity
+# Plane Health Check Script (Decoupled Stack Support)
 # Usage: ./scripts/health-check.sh
 # ============================================================
 
@@ -39,6 +38,13 @@ else
     DC_CMD="docker-compose"
 fi
 
+# Decoupled stack support
+if [ -f "${PLANE_DIR}/docker-compose.db.yaml" ]; then
+    DC_CMD_ALL="$DC_CMD -f ${PLANE_DIR}/docker-compose.db.yaml -f ${PLANE_DIR}/docker-compose.app.yaml -f ${PLANE_DIR}/docker-compose.proxy.yaml -f ${PLANE_DIR}/docker-compose.monitor.yaml --env-file=${PLANE_DIR}/plane.env"
+else
+    DC_CMD_ALL="$DC_CMD"
+fi
+
 check_pass() {
     echo -e "  ${GREEN}✅ PASS${NC} — $1"
 }
@@ -63,10 +69,8 @@ echo ""
 # ============================================================
 echo -e "${BLUE}[Containers]${NC}"
 # ============================================================
-cd "${PLANE_DIR}" 2>/dev/null || true
-
-for svc in $($DC_CMD ps --services 2>/dev/null); do
-    status=$($DC_CMD ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
+for svc in $($DC_CMD_ALL ps --services 2>/dev/null); do
+    status=$($DC_CMD_ALL ps --format "{{.Status}}" ${svc} 2>/dev/null | head -1)
     if echo "$status" | grep -qi "running\|up"; then
         check_pass "Container: ${svc}"
     else
@@ -85,7 +89,7 @@ else
     check_fail "Web UI not accessible (HTTP ${http_code})"
 fi
 
-api_code=$($DC_CMD exec -T api python3 -c "import urllib.request; print(urllib.request.urlopen('http://localhost:8000/').getcode())" 2>/dev/null || echo "000")
+api_code=$($DC_CMD_ALL exec -T api python3 -c "import urllib.request; print(urllib.request.urlopen('http://localhost:8000/').getcode())" 2>/dev/null || echo "000")
 if [ "$api_code" = "200" ]; then
     check_pass "API health endpoint (internal)"
 else
@@ -146,7 +150,7 @@ echo ""
 echo -e "${BLUE}[Database]${NC}"
 # ============================================================
 
-db_check=$($DC_CMD exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
+db_check=$($DC_CMD_ALL exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
 if echo "$db_check" | grep -q "[0-9]"; then
     check_pass "PostgreSQL connection OK"
 else
@@ -154,7 +158,7 @@ else
 fi
 
 # Redis
-redis_check=$($DC_CMD exec -T plane-redis redis-cli ping 2>/dev/null || echo "FAIL")
+redis_check=$($DC_CMD_ALL exec -T plane-redis redis-cli ping 2>/dev/null || echo "FAIL")
 if echo "$redis_check" | grep -qi "PONG"; then
     check_pass "Redis connection OK"
 else
@@ -172,7 +176,7 @@ elif [ $ERRORS -eq 0 ]; then
     echo -e "  ${YELLOW}${WARNINGS} warning(s), but no critical issues.${NC}"
 else
     echo -e "  ${RED}${ERRORS} FAILED check(s), ${WARNINGS} warning(s).${NC}"
-    echo "  Check logs: $DC_CMD logs -f"
+    echo "  Check logs: $DC_CMD_ALL logs -f"
 fi
 echo -e "${BLUE}══════════════════════════════════════════════${NC}"
 
