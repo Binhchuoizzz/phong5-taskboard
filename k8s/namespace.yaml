@@ -1,0 +1,10 @@
+# Plane Kubernetes Namespace
+# Apply: kubectl apply -f k8s/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plane
+  labels:
+    app: plane
+    environment: production
+    team: sentinel-antt

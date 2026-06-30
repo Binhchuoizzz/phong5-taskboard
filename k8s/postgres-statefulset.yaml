@@ -1,0 +1,95 @@
+# PostgreSQL StatefulSet for Kubernetes
+# For production, consider using CloudNativePG operator instead
+# Apply: kubectl apply -f k8s/postgres-statefulset.yaml
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: plane
+type: Opaque
+stringData:
+  POSTGRES_USER: plane
+  POSTGRES_PASSWORD: CHANGE_ME_STRONG_PASSWORD  # TODO: change this
+  POSTGRES_DB: plane
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: plane
+  labels:
+    app: plane
+    component: postgres
+spec:
+  serviceName: postgres
+  replicas: 1  # For HA, use CloudNativePG operator with replicas
+  selector:
+    matchLabels:
+      app: plane
+      component: postgres
+  template:
+    metadata:
+      labels:
+        app: plane
+        component: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - secretRef:
+            name: postgres-secret
+        resources:
+          requests:
+            cpu: '2'
+            memory: 4Gi
+          limits:
+            cpu: '8'
+            memory: 32Gi
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - plane
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - plane
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 500Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: plane
+spec:
+  selector:
+    app: plane
+    component: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None  # Headless service for StatefulSet

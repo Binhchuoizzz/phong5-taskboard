@@ -1,0 +1,80 @@
+# Redis Deployment for Kubernetes
+# For production HA, consider Bitnami Redis Helm chart with sentinel
+# Apply: kubectl apply -f k8s/redis-deployment.yaml
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: plane
+  labels:
+    app: plane
+    component: redis
+spec:
+  replicas: 1  # For HA, use Bitnami Redis with sentinel (3 replicas)
+  selector:
+    matchLabels:
+      app: plane
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: plane
+        component: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        command:
+        - redis-server
+        - --maxmemory
+        - 2gb
+        - --maxmemory-policy
+        - allkeys-lru
+        - --appendonly
+        - "yes"
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: '2'
+            memory: 4Gi
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: redis-data
+        emptyDir: {}  # For persistence, use PVC
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: plane
+spec:
+  selector:
+    app: plane
+    component: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
