@@ -23,3 +23,9 @@ Thumbs.db
 # Cloned dependencies
 plane/
 
+# Plane App secrets and downloads
+plane-app/plane.env
+plane-app/plane.env.bak
+plane-app/archive/
+
+
