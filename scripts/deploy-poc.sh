@@ -70,13 +70,24 @@ echo ""
 echo -e "${BLUE}[3/6] Running Plane setup...${NC}"
 cd "${PLANE_DIR}"
 
-# Check if .env already exists from our template
+# Configure environment files
 if [ -f "${PROJECT_DIR}/env/.env.local" ]; then
-    echo -e "${YELLOW}  Found custom .env.local — copying to Plane directory${NC}"
-    cp "${PROJECT_DIR}/env/.env.local" "${PLANE_DIR}/.env"
+    echo -e "${YELLOW}  Found custom .env.local — running setup helper...${NC}"
+    python3 "${PROJECT_DIR}/scripts/setup-plane-envs.py"
 else
-    echo "  Running Plane's setup script..."
-    ./setup.sh
+    echo -e "${YELLOW}  No custom .env.local found. Creating one from template...${NC}"
+    cp "${PROJECT_DIR}/env/.env.example" "${PROJECT_DIR}/env/.env.local"
+    python3 -c "
+import secrets, os
+local_env = '${PROJECT_DIR}/env/.env.local'
+with open(local_env, 'r') as f:
+    content = f.read()
+content = content.replace('CHANGE_ME_USE_STRONG_PASSWORD', secrets.token_urlsafe(24))
+content = content.replace('CHANGE_ME_64_CHARS_RANDOM_STRING', secrets.token_hex(32))
+with open(local_env, 'w') as f:
+    f.write(content)
+"
+    python3 "${PROJECT_DIR}/scripts/setup-plane-envs.py"
 fi
 echo ""
 
