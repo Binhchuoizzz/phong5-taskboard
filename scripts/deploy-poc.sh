@@ -39,18 +39,28 @@ echo ""
 echo -e "${BLUE}[2/6] Cloning Plane repository...${NC}"
 if [ -d "${PLANE_DIR}" ] && [ "$(ls -A ${PLANE_DIR})" ]; then
     echo -e "${YELLOW}  Directory ${PLANE_DIR} already exists.${NC}"
-    read -p "  Overwrite? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        sudo rm -rf "${PLANE_DIR}"
+    if [ -w "${PLANE_DIR}" ]; then
+        rm -rf "${PLANE_DIR}"
     else
-        echo "  Skipping clone, using existing directory."
+        # Fallback to sudo if not writable
+        read -p "  Overwrite using sudo? (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            sudo rm -rf "${PLANE_DIR}"
+        else
+            echo "  Skipping clone, using existing directory."
+        fi
     fi
 fi
 
 if [ ! -d "${PLANE_DIR}" ] || [ -z "$(ls -A ${PLANE_DIR} 2>/dev/null)" ]; then
-    sudo mkdir -p "${PLANE_DIR}"
-    sudo chown $(whoami):$(whoami) "${PLANE_DIR}"
+    PARENT_DIR=$(dirname "${PLANE_DIR}")
+    if [ -w "${PARENT_DIR}" ] || [ -w "${PLANE_DIR}" 2>/dev/null ]; then
+        mkdir -p "${PLANE_DIR}"
+    else
+        sudo mkdir -p "${PLANE_DIR}"
+        sudo chown $(whoami):$(whoami) "${PLANE_DIR}"
+    fi
     git clone --depth 1 -b master https://github.com/makeplane/plane.git "${PLANE_DIR}"
     echo -e "${GREEN}  ✅ Cloned to ${PLANE_DIR}${NC}"
 fi
