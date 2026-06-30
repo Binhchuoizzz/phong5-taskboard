@@ -28,4 +28,7 @@ plane-app/plane.env
 plane-app/plane.env.bak
 plane-app/archive/
 
-
+# Python Virtual Environment & Dev Stubs
+.venv/
+requirements/
+requirements-dev.txt
