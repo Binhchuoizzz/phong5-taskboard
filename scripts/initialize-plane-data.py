@@ -33,7 +33,7 @@ try:
             admin_user.save()
             print(f"Updated admin user: {admin_email}")
 
-        # 2. Promote to InstanceAdmin
+        # 2. Promote to InstanceAdmin and complete setup status
         instance = Instance.objects.last()
         if instance:
             _, created = InstanceAdmin.objects.get_or_create(
@@ -43,6 +43,10 @@ try:
             )
             if created:
                 print("Promoted admin user to Instance Admin role.")
+            instance.is_setup_done = True
+            instance.is_signup_screen_visited = True
+            instance.save()
+            print("Set instance setup flags (is_setup_done, is_signup_screen_visited) to True.")
         else:
             print("Warning: No Instance object found in database!")
 
