@@ -111,7 +111,7 @@ Sau khi cài đặt thành công, truy cập giao diện thông qua địa chỉ
    ```
 2. Chạy tệp kiểm thử tích hợp (truyền địa chỉ IP đích qua biến môi trường `BASE_URL`):
    ```bash
-   BASE_URL="http://<server-ip>" python3 scripts/test_full_integration.py
+   BASE_URL="http://<server-ip>" python3 tests/integration/test_full_integration.py
    ```
 Nếu 33/33 kiểm tra trả về kết quả `✅ PASS`, hệ thống đã sẵn sàng và hoạt động ổn định hoàn toàn!
 
@@ -130,11 +130,6 @@ Nếu 33/33 kiểm tra trả về kết quả `✅ PASS`, hệ thống đã sẵ
 │   ├── 06-backup-restore.md   # Backup & disaster recovery
 │   ├── 07-monitoring.md       # Monitoring & alerting
 │   └── 08-onboarding.md       # Onboarding teams
-├── docker/                    # Docker configs
-│   ├── docker-compose.yml     # PoC deployment
-│   ├── docker-compose.prod.yml# Production overrides
-│   └── nginx/                 # Nginx reverse proxy
-│       └── plane.conf         # Nginx config
 ├── env/                       # Environment configs
 │   ├── .env.example           # Template
 │   └── .gitignore             # Ensure .env.local never committed
@@ -143,7 +138,16 @@ Nếu 33/33 kiểm tra trả về kết quả `✅ PASS`, hệ thống đã sẵ
 │   ├── deploy-poc.sh          # Deploy PoC tự động
 │   ├── backup.sh              # Backup database + storage
 │   ├── restore.sh             # Restore từ backup
+│   ├── setup_plane_app_env.py # Helper đồng bộ env
+│   ├── setup_plane_envs.py    # Helper đồng bộ env plane
+│   ├── inject_custom_ui.sh    # Chèn stylesheet giao diện tùy biến
 │   └── health-check.sh        # Health check services
+├── tests/                     # 🧪 Thư mục kiểm thử phần mềm độc lập
+│   ├── integration/           # Kiểm thử tích hợp E2E API
+│   │   └── test_full_integration.py
+│   └── unit/                  # Kiểm thử đơn vị (Unit tests) các module helper
+│       ├── test_env_generator.py
+│       └── test_ui_injector.py
 ├── k8s/                       # Kubernetes configs (Phase 2)
 │   ├── namespace.yaml
 │   ├── plane-deployment.yaml

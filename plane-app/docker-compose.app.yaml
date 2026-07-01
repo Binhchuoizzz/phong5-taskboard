@@ -6,7 +6,7 @@ services:
     container_name: plane-app-web-1
     restart: always
     volumes:
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/plane-app/custom-ui.css:/usr/share/nginx/html/custom-ui.css:ro
+      - ./custom-ui.css:/usr/share/nginx/html/custom-ui.css:ro
     env_file:
       - plane.env
     networks:
@@ -36,7 +36,7 @@ services:
     container_name: plane-app-admin-1
     restart: always
     volumes:
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/plane-app/custom-ui.css:/usr/share/nginx/html/custom-ui.css:ro
+      - ./custom-ui.css:/usr/share/nginx/html/custom-ui.css:ro
     env_file:
       - plane.env
     networks:

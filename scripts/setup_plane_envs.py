@@ -1,7 +1,8 @@
 import os
 import secrets
 
-PROJECT_ROOT = "/home/binhchuoiz/Projects/Personal/NoteAppC12"
+# Resolve PROJECT_ROOT dynamically relative to this script's location
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLANE_DIR = os.path.join(PROJECT_ROOT, "plane")
 
 # 1. Read secrets from env/.env.local

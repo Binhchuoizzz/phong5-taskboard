@@ -17,7 +17,7 @@ services:
     volumes:
       - proxy_config:/config
       - proxy_data:/data
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/plane-app/Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile
     env_file:
       - plane.env
     environment:

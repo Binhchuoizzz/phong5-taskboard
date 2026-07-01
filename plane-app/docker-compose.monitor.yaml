@@ -6,8 +6,8 @@ services:
     container_name: plane-monitor-prometheus
     restart: always
     volumes:
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml
       - prometheus_data:/prometheus
     ports:
       - "127.0.0.1:9090:9090"
@@ -27,8 +27,8 @@ services:
       - "127.0.0.1:3001:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - /home/binhchuoiz/Projects/Personal/NoteAppC12/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - default
     logging:

@@ -56,7 +56,7 @@ with open(local_env, 'w') as f:
 fi
 
 # Run helper to generate plane-app/plane.env with URLs
-python3 "${PROJECT_DIR}/scripts/setup-plane-app-env.py"
+python3 "${PROJECT_DIR}/scripts/setup_plane_app_env.py"
 echo -e "${GREEN}  ✅ plane-app/plane.env updated.${NC}"
 echo ""
 
