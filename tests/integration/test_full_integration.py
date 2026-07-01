@@ -165,14 +165,14 @@ if r.status_code == 200:
 else:
     fail("GET /members/", f"HTTP {r.status_code}: {r.text[:200]}")
 
-# member1 should only see SOC project (PRJ6-Analytics)
+# member1 should only see Analytics project (PRJ6-Analytics)
 if member1_session:
     r = member1_session.get(f"{BASE_URL}/api/workspaces/{ws_slug}/projects/", timeout=5)
     if r.status_code == 200:
         member_projects = r.json()
         proj_names = [p.get("identifier") for p in member_projects] if isinstance(member_projects, list) else []
         ok(f"RBAC member1 sees projects: {proj_names}")
-        if "TO6" in str(proj_names):
+        if "PRJ6" in str(proj_names):
             ok("RBAC member1 correctly sees PRJ6-Analytics")
     else:
         fail("RBAC member1 GET /projects/", f"HTTP {r.status_code}")

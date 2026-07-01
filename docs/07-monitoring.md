@@ -251,7 +251,7 @@ Dashboard bao gồm:
 # Thêm vào cuối health-check.sh
 if [ $ERRORS -gt 0 ]; then
     # Option 1: Gửi email
-    echo "Plane health check failed: ${ERRORS} errors" | mail -s "ALERT: Plane Down" admin@sentinel.internal
+    echo "Plane health check failed: ${ERRORS} errors" | mail -s "alert: plane-down" admin@sentinel.internal
 
     # Option 2: Webhook (nếu có chat tool)
     # curl -X POST -H "Content-Type: application/json" \

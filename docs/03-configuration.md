@@ -1,18 +1,17 @@
-# 03 — Configuration (Cấu hình Workspace, Projects, Workflow)
+# 03 — Configuration (Workspace, Projects, Workflow)
 
-## Mục tiêu
+## Objective
 
-Thiết lập cấu trúc tổ chức trong Plane: workspace, 7 projects, workflow states, labels, RBAC.
+Configure organizational structure in Plane: workspace, 7 projects, workflow states, labels, RBAC.
 
 ---
 
 ## 1. Workspace Setup
 
-### Tạo Workspace
+### Create Workspace
 
-- **Name:** `Sentinel-ANTT`
+- **Name:** `Sentinel-Workspace`
 - **Slug:** `sentinel`
-- **Logo:** Upload logo phòng 5 (nếu có)
 - **Timezone:** `Asia/Ho_Chi_Minh` (UTC+7)
 
 ### Workspace Settings
@@ -22,164 +21,164 @@ Thiết lập cấu trúc tổ chức trong Plane: workspace, 7 projects, workfl
 
 ---
 
-## 2. Tạo 7 Projects
+## 2. Create 7 Projects
 
-Mỗi tổ = 1 project. Cấu hình chi tiết:
+One project per functional area:
 
 ### Project 1: `PRJ1-Core`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 1 — Tham mưu Tổng hợp |
-| Identifier | TO1 |
-| Description | Kế hoạch, báo cáo tổng hợp, điều phối công việc liên tổ |
-| Network | Secret (chỉ members thấy) |
-| Lead | (Trưởng Tổ 1) |
-| Default Assignee | (Trưởng Tổ 1) |
+| Name | Core Platform |
+| Identifier | PRJ1 |
+| Description | Architecture, API foundations, system coordination |
+| Network | Secret (members only) |
+| Lead | (Project Lead) |
+| Default Assignee | (Project Lead) |
 
 ### Project 2: `PRJ2-Security`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 2 — GRC & Chính sách |
-| Identifier | TO2 |
-| Description | Governance, Risk, Compliance. Quản lý chính sách ANTT, đánh giá rủi ro |
+| Name | Security Compliance |
+| Identifier | PRJ2 |
+| Description | Governance, Risk, Compliance. Policy management, risk assessment |
 | Network | Secret |
-| Lead | (Trưởng Tổ 2) |
+| Lead | (Project Lead) |
 
 ### Project 3: `PRJ3-DevOps`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 3 — An ninh Vật lý |
-| Identifier | TO3 |
-| Description | Giám sát camera, access control, tuần tra, an ninh cơ sở vật chất |
+| Name | Infrastructure & DevOps |
+| Identifier | PRJ3 |
+| Description | CI/CD pipelines, deployment automation, network management |
 | Network | Secret |
-| Lead | (Trưởng Tổ 3) |
+| Lead | (Project Lead) |
 
 ### Project 4: `PRJ4-QA`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 4 — Kiểm thử |
-| Identifier | TO4 |
+| Name | Quality Assurance |
+| Identifier | PRJ4 |
 | Description | Penetration testing, red team operations, vulnerability assessment |
 | Network | Confidential (highly restricted) |
-| Lead | (Trưởng Tổ 4) |
+| Lead | (Project Lead) |
 
 ### Project 5: `PRJ5-Integrations`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 5 — Tích hợp & Triển khai |
-| Identifier | TO5 |
-| Description | Tích hợp công nghệ mới, triển khai hệ thống, system integration |
+| Name | System Integrations |
+| Identifier | PRJ5 |
+| Description | Webhooks, API connectors, technology deployment, system integration |
 | Network | Secret |
-| Lead | (Trưởng Tổ 5) |
+| Lead | (Project Lead) |
 
 ### Project 6: `PRJ6-Analytics`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 6 — SOC (Security Operations Center) |
-| Identifier | TO6 |
-| Description | Giám sát an ninh 24/7, incident response, SIEM operations |
+| Name | Threat Analytics |
+| Identifier | PRJ6 |
+| Description | 24/7 security monitoring, incident response, SIEM operations |
 | Network | Confidential |
-| Lead | (Trưởng Tổ 6) |
+| Lead | (Project Lead) |
 
 ### Project 7: `PRJ7-AI`
 
 | Field | Value |
 |---|---|
-| Name | Tổ 7 — AI & Automation |
-| Identifier | TO7 |
-| Description | Nghiên cứu AI, ML models cho security, AI-powered automation |
+| Name | AI Engine |
+| Identifier | PRJ7 |
+| Description | AI research, ML models for security, AI-powered automation |
 | Network | Secret |
-| Lead | (Trưởng Tổ 7) |
+| Lead | (Project Lead) |
 
 ---
 
 ## 3. Workflow States
 
-### Workflow chung (áp dụng cho TO1, TO2, TO3, TO5, TO7)
+### General Workflow (PRJ1, PRJ2, PRJ3, PRJ5, PRJ7)
 
-| State | Category | Color | Mô tả |
+| State | Category | Color | Description |
 |---|---|---|---|
-| Backlog | Backlog | Gray #94a3b8 | Chưa lên kế hoạch |
-| Todo | Unstarted | Blue #3b82f6 | Đã lên kế hoạch, chờ bắt đầu |
-| In Progress | Started | Yellow #eab308 | Đang thực hiện |
-| In Review | Started | Purple #a855f7 | Đang được review |
-| Testing | Started | Orange #f97316 | Đang test/kiểm tra |
-| Done | Completed | Green #22c55e | Hoàn thành |
-| Cancelled | Cancelled | Red #ef4444 | Hủy bỏ |
+| Backlog | Backlog | Gray #94a3b8 | Not yet planned |
+| Todo | Unstarted | Blue #3b82f6 | Planned, waiting to start |
+| In Progress | Started | Yellow #eab308 | Currently in progress |
+| In Review | Started | Purple #a855f7 | Under review |
+| Testing | Started | Orange #f97316 | Testing/verification |
+| Done | Completed | Green #22c55e | Complete |
+| Cancelled | Cancelled | Red #ef4444 | Cancelled |
 
-### Workflow SOC — Incident Response (PRJ6-Analytics)
+### Incident Response Workflow — PRJ6-Analytics
 
-| State | Category | Color | Mô tả |
+| State | Category | Color | Description |
 |---|---|---|---|
-| Detected | Backlog | Red #ef4444 | Phát hiện sự cố/mối đe dọa |
-| Triaging | Unstarted | Orange #f97316 | Đánh giá mức độ nghiêm trọng |
-| Investigating | Started | Yellow #eab308 | Điều tra nguyên nhân, phạm vi |
-| Containment | Started | Blue #3b82f6 | Ngăn chặn lây lan |
-| Eradication | Started | Purple #a855f7 | Loại bỏ mối đe dọa |
-| Recovery | Started | Teal #14b8a6 | Khôi phục hệ thống |
-| Post-Mortem | Started | Indigo #6366f1 | Phân tích sau sự cố |
-| Closed | Completed | Green #22c55e | Đóng case |
+| Detected | Backlog | Red #ef4444 | Threat/incident detected |
+| Triaging | Unstarted | Orange #f97316 | Severity assessment |
+| Investigating | Started | Yellow #eab308 | Root cause investigation |
+| Containment | Started | Blue #3b82f6 | Spread containment |
+| Eradication | Started | Purple #a855f7 | Threat removal |
+| Recovery | Started | Teal #14b8a6 | System recovery |
+| Post-Mortem | Started | Indigo #6366f1 | Post-incident analysis |
+| Closed | Completed | Green #22c55e | Case closed |
 
-### Workflow Pentest (PRJ4-QA)
+### Pentest Workflow — PRJ4-QA
 
-| State | Category | Color | Mô tả |
+| State | Category | Color | Description |
 |---|---|---|---|
-| Scoping | Unstarted | Blue #3b82f6 | Xác định phạm vi kiểm thử |
-| Reconnaissance | Started | Yellow #eab308 | Thu thập thông tin |
-| Exploitation | Started | Red #ef4444 | Khai thác lỗ hổng |
-| Reporting | Started | Purple #a855f7 | Viết báo cáo |
-| Remediation Verify | Started | Orange #f97316 | Kiểm tra sau khi vá |
-| Closed | Completed | Green #22c55e | Hoàn tất |
-| On Hold | Cancelled | Gray #94a3b8 | Tạm dừng |
+| Scoping | Unstarted | Blue #3b82f6 | Define test scope |
+| Reconnaissance | Started | Yellow #eab308 | Information gathering |
+| Exploitation | Started | Red #ef4444 | Exploit vulnerabilities |
+| Reporting | Started | Purple #a855f7 | Write report |
+| Remediation Verify | Started | Orange #f97316 | Verify patch |
+| Closed | Completed | Green #22c55e | Complete |
+| On Hold | Cancelled | Gray #94a3b8 | Paused |
 
 ---
 
 ## 4. Labels
 
-Tạo các labels sau ở workspace level (áp dụng cho tất cả projects):
+Create the following labels at workspace level (applies to all projects):
 
 ### Priority Labels
 
-| Label | Color | Mô tả |
+| Label | Color | Description |
 |---|---|---|
-| `P0-Critical` | #dc2626 (đỏ đậm) | Sự cố nghiêm trọng, cần xử lý ngay |
-| `P1-High` | #ea580c (cam) | Ưu tiên cao, cần xử lý trong ngày |
-| `P2-Medium` | #ca8a04 (vàng) | Ưu tiên trung bình, trong tuần |
-| `P3-Low` | #16a34a (xanh lá) | Ưu tiên thấp, khi có thời gian |
+| `P0-Critical` | #dc2626 (deep red) | Critical incident, requires immediate action |
+| `P1-High` | #ea580c (orange) | High priority, handle within the day |
+| `P2-Medium` | #ca8a04 (yellow) | Medium priority, within the week |
+| `P3-Low` | #16a34a (green) | Low priority, when time allows |
 
 ### Type Labels
 
-| Label | Color | Mô tả |
+| Label | Color | Description |
 |---|---|---|
-| `Bug` | #dc2626 | Lỗi cần sửa |
-| `Feature` | #2563eb | Tính năng mới |
-| `Incident` | #9333ea | Sự cố an ninh |
-| `Audit` | #0891b2 | Đánh giá/kiểm toán |
-| `Compliance` | #4f46e5 | Tuân thủ chính sách |
-| `Research` | #7c3aed | Nghiên cứu |
-| `Deployment` | #059669 | Triển khai |
-| `Task` | #6b7280 | Công việc thường ngày |
+| `Bug` | #dc2626 | Defect to fix |
+| `Feature` | #2563eb | New feature or enhancement |
+| `Incident` | #9333ea | Security incident |
+| `Audit` | #0891b2 | Review/audit |
+| `Compliance` | #4f46e5 | Policy compliance |
+| `Research` | #7c3aed | Research & development |
+| `Deployment` | #059669 | Production deployment |
+| `Task` | #6b7280 | General task |
 
 ### Security Classification Labels
 
-| Label | Color | Mô tả |
+| Label | Color | Description |
 |---|---|---|
-| `Confidential` | #dc2626 (đỏ) | Tối mật — chỉ người được ủy quyền |
-| `Internal` | #ea580c (cam) | Nội bộ — nhân viên phòng |
-| `Public` | #16a34a (xanh lá) | Công khai |
+| `Confidential` | #dc2626 (red) | Restricted to authorized personnel only |
+| `Internal` | #ea580c (orange) | Internal use only |
+| `Public` | #16a34a (green) | Public information |
 
 ### Scope Labels
 
-| Label | Color | Mô tả |
+| Label | Color | Description |
 |---|---|---|
-| `Cross-team` | #8b5cf6 | Liên quan nhiều tổ |
-| `Urgent-Report` | #dc2626 | Cần báo cáo lãnh đạo ngay |
+| `Cross-team` | #8b5cf6 | Involves multiple projects/teams |
+| `Urgent-Report` | #dc2626 | Requires immediate leadership escalation |
 
 ---
 
@@ -187,18 +186,18 @@ Tạo các labels sau ở workspace level (áp dụng cho tất cả projects):
 
 ### Workspace Roles
 
-| Role | Quyền | Áp dụng cho |
+| Role | Permissions | Assigned To |
 |---|---|---|
-| **Owner** | Full control workspace | Trưởng phòng |
-| **Admin** | Manage projects, members, settings | Phó phòng, IT admin |
-| **Member** | Access assigned projects, create/edit issues | Nhân viên |
-| **Guest** | View only trong projects được mời | Lãnh đạo cấp trên |
+| **Owner** | Full workspace control | Department head |
+| **Admin** | Manage projects, members, settings | IT admin, leads |
+| **Member** | Access assigned projects, create/edit issues | All staff |
+| **Guest** | View-only in invited projects | Senior leadership |
 
 ### Project-level Permissions
 
 | Action | Admin | Member | Guest |
 |---|---|---|---|
-| Tạo issue | ✅ | ✅ | ❌ |
+| Create issue | ✅ | ✅ | ❌ |
 | Edit issue | ✅ | ✅ (own + assigned) | ❌ |
 | Delete issue | ✅ | ❌ | ❌ |
 | Manage members | ✅ | ❌ | ❌ |
@@ -207,28 +206,28 @@ Tạo các labels sau ở workspace level (áp dụng cho tất cả projects):
 
 ### Assignment Strategy
 
-- Mỗi nhân viên chỉ được thêm vào project **tổ mình**
-- Trưởng tổ = Project Admin
-- Cross-team tasks: tạo issue trong project tổ chủ trì, tag members tổ liên quan
+- Each staff member is only added to their assigned project
+- Project lead = Project Admin
+- Cross-team tasks: create issue in the lead project, tag members from other projects
 
 ---
 
-## 6. Modules (Epics) — Gợi ý
+## 6. Modules (Epics) — Suggestions
 
-Mỗi project nên có các Modules mặc định:
+Each project should have default Modules:
 
-| Module | Áp dụng | Mô tả |
+| Module | Applies To | Description |
 |---|---|---|
-| `Q3-2026` | Tất cả | Công việc quý 3/2026 |
-| `Q4-2026` | Tất cả | Công việc quý 4/2026 |
-| `Dự án X` | Theo tổ | Dự án/campaign cụ thể |
-| `Incident-YYYY-MM` | PRJ6-Analytics | Group incidents theo tháng |
+| `Q3-2026` | All | Q3 2026 work items |
+| `Q4-2026` | All | Q4 2026 work items |
+| `Project-X` | Per project | Specific project/campaign |
+| `Incident-YYYY-MM` | PRJ6-Analytics | Group incidents by month |
 
 ---
 
-## 7. Cycles (Sprints) — Gợi ý
+## 7. Cycles (Sprints) — Suggestions
 
-Sprint 2 tuần:
+2-week sprints:
 
 | Cycle | Start | End |
 |---|---|---|

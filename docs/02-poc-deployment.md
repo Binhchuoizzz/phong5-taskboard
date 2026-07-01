@@ -106,10 +106,10 @@ plane-proxy       running
 ### God Mode Setup:
 
 1. Vào **Settings** → **General**:
-   - Instance name: `Sentinel-ANTT`
+   - Instance name: `Sentinel-Workspace`
    - Disable public sign-up (chỉ cho invite)
 
-2. Tạo **Workspace**: `Sentinel-ANTT`
+2. Tạo **Workspace**: `Sentinel-Workspace`
    - URL slug: `sentinel`
 
 3. Tiếp tục **Phase 2** trong [03-configuration.md](./03-configuration.md)

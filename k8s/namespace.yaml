@@ -7,4 +7,4 @@ metadata:
   labels:
     app: plane
     environment: production
-    team: sentinel-antt
+    team: sentinel

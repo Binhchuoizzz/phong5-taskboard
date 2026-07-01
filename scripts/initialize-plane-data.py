@@ -16,8 +16,8 @@ try:
                 email=admin_email,
                 password="Sentinel@123",
                 username="admin",
-                first_name="Bình",
-                last_name="Nguyễn Đức",
+                first_name="Admin",
+                last_name="System",
                 is_superuser=True,
                 is_staff=True,
                 is_email_verified=True
@@ -28,8 +28,8 @@ try:
             admin_user.is_superuser = True
             admin_user.is_staff = True
             admin_user.is_email_verified = True
-            admin_user.first_name = "Bình"
-            admin_user.last_name = "Nguyễn Đức"
+            admin_user.first_name = "Admin"
+            admin_user.last_name = "System"
             admin_user.save()
             print(f"Updated admin user: {admin_email}")
 
@@ -55,7 +55,7 @@ try:
         workspace = Workspace.objects.filter(slug=workspace_slug).first()
         if not workspace:
             workspace = Workspace.objects.create(
-                name="Sentinel-ANTT",
+                name="Sentinel-Workspace",
                 slug=workspace_slug,
                 owner=admin_user,
                 organization_size="5000"
@@ -78,13 +78,13 @@ try:
 
         # 5. Define projects to create
         projects_data = [
-            ("PRJ1-Core", "TO1", "Tham mưu Tổng hợp — kế hoạch, báo cáo, điều phối"),
-            ("PRJ2-Security", "TO2", "GRC & Chính sách — compliance, policy, risk assessment"),
-            ("PRJ3-DevOps", "TO3", "An ninh Vật lý — camera, access control, patrol"),
-            ("PRJ4-QA", "TO4", "Kiểm thử — pentest, red team, vuln assessment"),
-            ("PRJ5-Integrations", "TO5", "Tích hợp & Triển khai — deploy tech mới, integration"),
-            ("PRJ6-Analytics", "TO6", "Security Operations Center — incident response, monitoring"),
-            ("PRJ7-AI", "TO7", "AI & Automation — ML models, AI security, research"),
+            ("PRJ1-Core", "PRJ1", "Core Platform — Architecture, API foundations & system coordination"),
+            ("PRJ2-Security", "PRJ2", "Security Compliance — GRC, policy, risk assessment"),
+            ("PRJ3-DevOps", "PRJ3", "Infrastructure & DevOps — CI/CD, deployment, network management"),
+            ("PRJ4-QA", "PRJ4", "Quality Assurance — Pentest, red team, vulnerability assessment"),
+            ("PRJ5-Integrations", "PRJ5", "System Integrations — Webhooks, API connectors, tech deployment"),
+            ("PRJ6-Analytics", "PRJ6", "Threat Analytics — Incident response, monitoring, SIEM"),
+            ("PRJ7-AI", "PRJ7", "AI Engine — ML models, AI security research & automation"),
         ]
 
         for name, identifier, desc in projects_data:
@@ -115,7 +115,7 @@ try:
                 print(f"Project {name} already exists.")
 
             # 6. Define custom workflow states for specific projects
-            if identifier == "TO6": # SOC (Incident Response)
+            if identifier == "PRJ6": # Threat Analytics (Incident Response)
                 states = [
                     ("Detected", "#EF4444", "backlog", True),
                     ("Triaging", "#F59E0B", "unstarted", False),
@@ -126,7 +126,7 @@ try:
                     ("Post-Mortem", "#6B7280", "started", False),
                     ("Closed", "#10B981", "completed", False),
                 ]
-            elif identifier == "TO4": # Pentesting (Kiểm thử)
+            elif identifier == "PRJ4": # Quality Assurance (Pentesting)
                 states = [
                     ("Scoping", "#6B7280", "backlog", True),
                     ("Reconnaissance", "#3B82F6", "unstarted", False),
@@ -210,10 +210,10 @@ try:
         config.save()
         print("Disabled public registration (signup). Only invited users can register.")
 
-        # 9. Create Mock Users for RBAC testing (Phase 2F & 3C)
+        # 9. Create Mock Users for RBAC testing
         mock_users = [
-            ("member1@sentinel.local", "member1", "Tổ 6", "Member 1", 15, "PRJ6-Analytics"),
-            ("guest1@sentinel.local", "guest1", "Tổ 1", "Guest 1", 5, "PRJ1-Core")
+            ("member1@sentinel.local", "member1", "Analytics", "Member 1", 15, "PRJ6-Analytics"),
+            ("guest1@sentinel.local", "guest1", "Core", "Guest 1", 5, "PRJ1-Core")
         ]
 
         for email, username, first_name, last_name, role_val, project_name in mock_users:

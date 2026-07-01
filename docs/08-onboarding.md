@@ -10,16 +10,16 @@
 
 ```
 Tuần 1: Deploy + Admin setup
-Tuần 2: Pilot 2 tổ (Tổ 7 AI + Tổ 4 Kiểm thử)
+Week 2: Pilot 2 teams (PRJ7 AI Engine + PRJ4 QA)
 Tuần 3: Thu feedback + điều chỉnh
 Tuần 4: Rollout toàn phòng (5 tổ còn lại)
 Tuần 5-6: Stabilize + support
 ```
 
-### Tại sao Tổ 7 và Tổ 4 pilot?
+### Why PRJ7 and PRJ4 for pilot?
 
-- **Tổ 7 (AI):** Team tech-savvy, dễ adopt tool mới, feedback chất lượng
-- **Tổ 4 (Kiểm thử):** Quen quản lý task theo project, có workflow rõ ràng
+- **PRJ7 (AI Engine):** Team tech-savvy, dễ adopt tool mới, feedback chất lượng
+- **PRJ4 (QA):** Quen quản lý task theo project, có workflow rõ ràng
 
 ---
 
@@ -40,8 +40,8 @@ Chuẩn bị file CSV:
 
 ```csv
 email,name,role,project
-nguyen.a@sentinel.internal,Nguyễn A,Member,PRJ7-AI
-tran.b@sentinel.internal,Trần B,Member,PRJ4-QA
+staff.a@sentinel.internal,Nguyễn A,Member,PRJ7-AI
+staff.b@sentinel.internal,Trần B,Member,PRJ4-QA
 ...
 ```
 
