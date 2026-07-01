@@ -54,7 +54,8 @@ services:
       LIVE_SERVER_SECRET_KEY: ${LIVE_SERVER_SECRET_KEY}
       REDIS_HOST: ${REDIS_HOST:-plane-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@plane-redis:6379/
     networks:
       - default
     logging:

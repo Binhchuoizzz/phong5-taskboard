@@ -158,7 +158,7 @@ else
 fi
 
 # Redis
-redis_check=$($DC_CMD_ALL exec -T plane-redis redis-cli ping 2>/dev/null || echo "FAIL")
+redis_check=$($DC_CMD_ALL exec -T plane-redis valkey-cli -a "${REDIS_PASSWORD:-}" --no-auth-warning ping 2>/dev/null || echo "FAIL")
 if echo "$redis_check" | grep -qi "PONG"; then
     check_pass "Redis connection OK"
 else
