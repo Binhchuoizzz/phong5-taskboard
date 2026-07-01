@@ -216,20 +216,20 @@
 
 > 📖 Hướng dẫn: [06-backup-restore.md](./06-backup-restore.md)
 
-- [ ] **5.1** Tạo backup script: `./scripts/backup.sh`
-  - [ ] pg_dump PostgreSQL → compressed file
-  - [ ] Backup MinIO data directory
-  - [ ] Backup .env và Docker configs
-- [ ] **5.2** Test backup: chạy script → file backup tạo thành công
-- [ ] **5.3** Tạo restore script: `./scripts/restore.sh`
-- [ ] **5.4** Test restore: restore vào instance mới → data nguyên vẹn
+- [x] **5.1** Tạo backup script: `./scripts/backup.sh`
+  - [x] pg_dump PostgreSQL → compressed file
+  - [x] Backup MinIO data directory
+  - [x] Backup .env và Docker configs
+- [x] **5.2** Test backup: chạy script → file backup tạo thành công
+- [x] **5.3** Tạo restore script: `./scripts/restore.sh`
+- [x] **5.4** Test restore: restore vào instance mới → data nguyên vẹn
 - [ ] **5.5** Setup cron job backup tự động:
   ```bash
   # Daily backup lúc 2:00 AM
-  0 2 * * * /opt/plane-deploy/scripts/backup.sh
+  0 2 * * * /home/binhchuoiz/Projects/Personal/NoteAppC12/scripts/backup.sh
   ```
-- [ ] **5.6** Backup retention policy: giữ 7 daily + 4 weekly + 3 monthly
-- [ ] **5.7** Test disaster recovery: destroy instance → restore từ backup → verify data
+- [x] **5.6** Backup retention policy: giữ 7 daily + 4 weekly + 3 monthly (đã tích hợp trong backup.sh)
+- [x] **5.7** Test disaster recovery: destroy instance → restore từ backup → verify data (đã chạy thử nghiệm thành công)
 
 ---
 
@@ -237,17 +237,17 @@
 
 > 📖 Hướng dẫn: [07-monitoring.md](./07-monitoring.md)
 
-- [ ] **6.1** Deploy Prometheus (dùng `monitoring/prometheus.yml`)
-- [ ] **6.2** Deploy Grafana (import dashboard `monitoring/grafana/dashboards/`)
-- [ ] **6.3** Cấu hình health check script: `./scripts/health-check.sh`
-- [ ] **6.4** Setup alerts:
-  - [ ] CPU > 80% → alert
-  - [ ] RAM > 85% → alert
-  - [ ] Disk > 90% → alert
-  - [ ] API response time > 5s → alert
-  - [ ] Container restart → alert
-- [ ] **6.5** Test alert: trigger condition → nhận được notification
-- [ ] **6.6** Setup uptime monitoring: check endpoint mỗi 5 phút
+- [x] **6.1** Deploy Prometheus (dùng `monitoring/prometheus.yml`)
+- [x] **6.2** Deploy Grafana (tự động provision datasource Prometheus & dashboards)
+- [x] **6.3** Cấu hình health check script: `./scripts/health-check.sh`
+- [x] **6.4** Setup alerts:
+  - [x] CPU > 80% → alert (cấu hình trong alert-rules.yml)
+  - [x] RAM > 85% → alert (cấu hình trong alert-rules.yml)
+  - [x] Disk > 90% → alert (cấu hình trong alert-rules.yml)
+  - [x] API response time > 5s → alert (cấu hình trong alert-rules.yml)
+  - [x] Container restart → alert (cấu hình trong alert-rules.yml)
+- [ ] **6.5** Test alert: trigger condition → nhận được notification (cần tích hợp Alertmanager + Webhook/Slack)
+- [x] **6.6** Setup uptime monitoring: check endpoint mỗi 5 phút (được giám sát qua Prometheus scrape targets)
 
 ---
 

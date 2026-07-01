@@ -1,41 +1,34 @@
 {
-  "__comment": "Grafana Dashboard placeholder for Plane monitoring. Import this JSON into Grafana UI.",
-  "dashboard": {
-    "title": "Plane Overview - Sentinel ANTT",
-    "description": "Monitoring dashboard for Plane self-hosted deployment",
-    "panels": [
-      {
-        "title": "System CPU Usage",
-        "type": "gauge",
-        "datasource": "Prometheus",
-        "targets": [{"expr": "100 - (avg(rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)"}]
-      },
-      {
-        "title": "System Memory Usage",
-        "type": "gauge",
-        "datasource": "Prometheus",
-        "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100"}]
-      },
-      {
-        "title": "Disk Usage",
-        "type": "gauge",
-        "datasource": "Prometheus",
-        "targets": [{"expr": "(1 - (node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'})) * 100"}]
-      },
-      {
-        "title": "Container Status",
-        "type": "table",
-        "datasource": "Prometheus",
-        "targets": [{"expr": "container_last_seen{name=~'plane.*'}"}]
-      },
-      {
-        "title": "API Response Time (p95)",
-        "type": "timeseries",
-        "datasource": "Prometheus",
-        "targets": [{"expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))"}]
-      }
-    ],
-    "time": {"from": "now-6h", "to": "now"},
-    "refresh": "30s"
-  }
+  "title": "Plane Overview - Sentinel ANTT",
+  "description": "Monitoring dashboard for Plane self-hosted deployment",
+  "panels": [
+    {
+      "title": "System CPU Usage",
+      "type": "gauge",
+      "datasource": "Prometheus",
+      "targets": [{"expr": "100 - (avg(rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)"}]
+    },
+    {
+      "title": "System Memory Usage",
+      "type": "gauge",
+      "datasource": "Prometheus",
+      "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100"}]
+    },
+    {
+      "title": "Disk Usage",
+      "type": "gauge",
+      "datasource": "Prometheus",
+      "targets": [{"expr": "(1 - (node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'})) * 100"}]
+    },
+    {
+      "title": "API Response Time (p95)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [{"expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))"}]
+    }
+  ],
+  "schemaVersion": 36,
+  "version": 1,
+  "time": {"from": "now-6h", "to": "now"},
+  "refresh": "30s"
 }

@@ -7,7 +7,7 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  # - "alert-rules.yml"  # Uncomment when alert rules are created
+  - "alert-rules.yml"
 
 scrape_configs:
   # Node metrics (install node-exporter first)
