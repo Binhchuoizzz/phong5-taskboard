@@ -124,6 +124,11 @@ echo "  Running initialize-plane-data.py seeding script..."
 $DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" exec -T api python manage.py shell < "${PROJECT_DIR}/scripts/initialize-plane-data.py"
 echo ""
 
+# Custom UI Injection
+echo "  Injecting Custom UI Stylesheet..."
+bash "${PROJECT_DIR}/scripts/inject-custom-ui.sh"
+echo ""
+
 # Run health checks
 echo "  Running health-check.sh..."
 PLANE_INSTALL_DIR="${PLANE_APP_DIR}" bash "${PROJECT_DIR}/scripts/health-check.sh"

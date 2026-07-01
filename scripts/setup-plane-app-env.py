@@ -19,9 +19,16 @@ pg_pass = variables.get("POSTGRES_PASSWORD", secrets.token_urlsafe(24))
 secret_key = variables.get("SECRET_KEY", secrets.token_hex(32))
 minio_pass = variables.get("MINIO_ROOT_PASSWORD", secrets.token_urlsafe(24))
 rabbit_pass = variables.get("RABBITMQ_DEFAULT_PASS", secrets.token_urlsafe(24))
+redis_pass = variables.get("REDIS_PASSWORD", "")
+redis_url = variables.get("REDIS_URL", "redis://plane-redis:6379/")
+web_url = variables.get("WEB_URL", "http://localhost")
+cors_allowed_origins = variables.get("CORS_ALLOWED_ORIGINS", "http://localhost")
+
+from urllib.parse import urlparse
+app_domain = urlparse(web_url).netloc or "localhost"
 live_secret = secrets.token_hex(32)
 
-print(f"Loaded credentials. PostgreSQL Pass length: {len(pg_pass)}, MinIO Pass length: {len(minio_pass)}, RabbitMQ Pass length: {len(rabbit_pass)}")
+print(f"Loaded credentials. PostgreSQL Pass length: {len(pg_pass)}, MinIO Pass length: {len(minio_pass)}, RabbitMQ Pass length: {len(rabbit_pass)}, Redis Pass length: {len(redis_pass)}")
 
 # 2. Modify plane-app/plane.env
 if os.path.exists(plane_env_path):
@@ -46,14 +53,16 @@ if os.path.exists(plane_env_path):
             line = f"DATABASE_URL=postgresql://plane:{pg_pass}@plane-db:5432/plane\n"
         elif line.startswith("AMQP_URL="):
             line = f"AMQP_URL=amqp://plane:{rabbit_pass}@plane-mq:5672/plane\n"
+        elif line.startswith("REDIS_PASSWORD="):
+            line = f"REDIS_PASSWORD={redis_pass}\n"
         elif line.startswith("REDIS_URL="):
-            line = "REDIS_URL=redis://plane-redis:6379/\n"
+            line = f"REDIS_URL={redis_url}\n"
         elif line.startswith("CORS_ALLOWED_ORIGINS="):
-            line = "CORS_ALLOWED_ORIGINS=http://localhost\n"
+            line = f"CORS_ALLOWED_ORIGINS={cors_allowed_origins}\n"
         elif line.startswith("WEB_URL="):
-            line = "WEB_URL=http://localhost\n"
+            line = f"WEB_URL={web_url}\n"
         elif line.startswith("APP_DOMAIN="):
-            line = "APP_DOMAIN=localhost\n"
+            line = f"APP_DOMAIN={app_domain}\n"
         new_lines.append(line)
         
     with open(plane_env_path, "w") as f:

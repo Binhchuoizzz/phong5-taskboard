@@ -5,6 +5,8 @@ services:
     image: makeplane/plane-frontend:${APP_RELEASE:-v1.3.1}
     container_name: plane-app-web-1
     restart: always
+    volumes:
+      - /home/binhchuoiz/Projects/Personal/NoteAppC12/plane-app/custom-ui.css:/usr/share/nginx/html/custom-ui.css:ro
     env_file:
       - plane.env
     networks:
@@ -33,6 +35,8 @@ services:
     image: makeplane/plane-admin:${APP_RELEASE:-v1.3.1}
     container_name: plane-app-admin-1
     restart: always
+    volumes:
+      - /home/binhchuoiz/Projects/Personal/NoteAppC12/plane-app/custom-ui.css:/usr/share/nginx/html/custom-ui.css:ro
     env_file:
       - plane.env
     networks:

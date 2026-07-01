@@ -1,0 +1,163 @@
+/* ==========================================================================
+   SENTINEL-ANTT PLANE SPECIAL CYBER-SECURITY THEME OVERLAY
+   Features: Cyber-dark slates, neon-cyan accent, glassmorphism, Outfit font.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* --- Force Outfit Font Globals --- */
+* {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* --- Dark Theme Custom Token Overrides --- */
+[data-theme*="dark"] {
+    /* Deep indigo/slate blacks */
+    --neutral-black: #07090e !important;
+    --neutral-100: #0a0d14 !important;
+    --neutral-200: #101420 !important;
+    --neutral-300: #151a28 !important;
+    --neutral-400: #1c2336 !important;
+    --neutral-500: #242d45 !important;
+    --neutral-600: #2d3856 !important;
+    --neutral-700: #3c496c !important;
+    --neutral-800: #64748b !important;
+    --neutral-900: #94a3b8 !important;
+    --neutral-1000: #cbd5e1 !important;
+    --neutral-1100: #e2e8f0 !important;
+    --neutral-1200: #f8fafc !important;
+    --neutral-white: #ffffff !important;
+
+    /* Cybersecurity Neon Cyan Accent Colors */
+    --brand-default: #00f0ff !important;
+    --brand-100: #0c202a !important;
+    --brand-200: #0e2b3b !important;
+    --brand-300: #103c54 !important;
+    --brand-400: #125577 !important;
+    --brand-500: #00f0ff !important;
+    --brand-700: #00d2e0 !important;
+    --brand-800: #00a4b0 !important;
+    --brand-900: #008fa0 !important;
+    --brand-1000: #e0f2fe !important;
+    --brand-1100: #f0f9ff !important;
+    --brand-1200: #f8fafc !important;
+
+    /* Base Layer Overrides */
+    --bg-canvas: #07090e !important;
+    --bg-surface-1: #0a0d14 !important;
+    --bg-surface-2: #101420 !important;
+    --bg-layer-1: #101420 !important;
+    --bg-layer-1-hover: #151a28 !important;
+    --bg-layer-1-active: #1c2336 !important;
+    --bg-layer-1-selected: #1c2336 !important;
+    --bg-layer-2: #151a28 !important;
+    --bg-layer-2-hover: #1c2336 !important;
+    --bg-layer-2-active: #242d45 !important;
+    --bg-layer-2-selected: #242d45 !important;
+    --bg-layer-3: #1c2336 !important;
+    --bg-layer-3-hover: #242d45 !important;
+    --bg-layer-3-active: #2d3856 !important;
+    --bg-layer-3-selected: #2d3856 !important;
+
+    --bg-accent-primary: #00f0ff !important;
+    --bg-accent-primary-hover: #00d2e0 !important;
+    --bg-accent-primary-active: #00a4b0 !important;
+    --bg-accent-subtle: #0c202a !important;
+    --bg-accent-subtle-hover: #0e2b3b !important;
+    --bg-accent-subtle-active: #103c54 !important;
+
+    /* Borders */
+    --border-subtle: rgba(0, 240, 255, 0.08) !important;
+    --border-subtle-1: rgba(0, 240, 255, 0.12) !important;
+    --border-strong: rgba(0, 240, 255, 0.2) !important;
+    --border-strong-1: rgba(0, 240, 255, 0.3) !important;
+    --border-accent-strong: #00f0ff !important;
+    --border-accent-subtle: rgba(0, 240, 255, 0.3) !important;
+
+    /* Text & Links */
+    --txt-accent-primary: #00f0ff !important;
+    --txt-accent-secondary: #00d2e0 !important;
+    --txt-link-primary: #00f0ff !important;
+    --txt-link-primary-hover: #00d2e0 !important;
+    
+    /* Icon Colors */
+    --txt-icon-accent-primary: #00f0ff !important;
+    --txt-icon-accent-subtle: #00a4b0 !important;
+    --txt-icon-accent-secondary: #00f0ff !important;
+}
+
+/* --- Glassmorphism Sidebars, Headers & Panels --- */
+aside, .sidebar, [class*="sidebar"], [class*="Sidebar"] {
+    background: rgba(10, 13, 20, 0.72) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border-right: 1px solid rgba(0, 240, 255, 0.08) !important;
+}
+
+header, [class*="header"], [class*="Header"] {
+    background: rgba(10, 13, 20, 0.75) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.08) !important;
+}
+
+/* Modals & Dialogs Glassmorphism */
+[role="dialog"], .modal, [class*="modal"], [class*="dialog"] {
+    background: rgba(21, 26, 40, 0.82) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    border: 1px solid rgba(0, 240, 255, 0.15) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 15px 0 rgba(0, 240, 255, 0.1) !important;
+}
+
+/* --- Task Cards Glow & Micro-animations --- */
+[data-draggable="true"], [class*="board-card"], [class*="issue-card"], [class*="Card"] {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+[data-draggable="true"]:hover, [class*="board-card"]:hover, [class*="issue-card"]:hover, [class*="Card"]:hover {
+    transform: translateY(-2.5px) scale(1.008) !important;
+    border-color: rgba(0, 240, 255, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 240, 255, 0.08) !important;
+}
+
+/* --- Interactive Elements Feedbacks --- */
+button, [role="button"], [class*="btn"], [class*="button"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+button:hover, [role="button"]:hover, [class*="btn"]:hover, [class*="button"]:hover {
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.2) !important;
+}
+
+/* --- Custom Slim Minimalist Scrollbar --- */
+::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+::-webkit-scrollbar-track {
+    background: rgba(10, 13, 20, 0.3) !important;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.15) !important;
+    border-radius: 3px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 240, 255, 0.3) !important;
+}
+
+/* --- Sentinel Custom Security Branding in Sidebar --- */
+aside::before, .sidebar::before, [class*="sidebar"]::before {
+    content: "🛡️ SENTINEL SECURE POC" !important;
+    display: block !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.15em !important;
+    color: #00f0ff !important;
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5) !important;
+    padding: 10px 16px !important;
+    text-align: center !important;
+    background: rgba(0, 240, 255, 0.04) !important;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.08) !important;
+    margin-bottom: 12px !important;
+    border-radius: 4px !important;
+    text-transform: uppercase !important;
+}
