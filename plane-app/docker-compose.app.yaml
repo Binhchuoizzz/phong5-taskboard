@@ -82,9 +82,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
       POSTGRES_DB: ${POSTGRES_DB:-plane}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      REDIS_HOST: ${REDIS_HOST:-plane-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
@@ -115,9 +112,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
       POSTGRES_DB: ${POSTGRES_DB:-plane}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      REDIS_HOST: ${REDIS_HOST:-plane-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
@@ -148,9 +142,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
       POSTGRES_DB: ${POSTGRES_DB:-plane}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      REDIS_HOST: ${REDIS_HOST:-plane-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
@@ -181,9 +172,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plane}
       POSTGRES_DB: ${POSTGRES_DB:-plane}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
-      REDIS_HOST: ${REDIS_HOST:-plane-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-plane-mq}
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-plane}
