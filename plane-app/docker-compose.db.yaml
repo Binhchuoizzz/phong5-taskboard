@@ -18,6 +18,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   plane-redis:
     image: valkey/valkey:7.2.11-alpine
@@ -27,6 +32,11 @@ services:
       - redisdata:/data
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   plane-mq:
     image: rabbitmq:3.13.6-management-alpine
@@ -41,6 +51,11 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   plane-minio:
     image: minio/minio:latest
@@ -54,6 +69,11 @@ services:
       - uploads:/export
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   pgdata:

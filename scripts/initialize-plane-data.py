@@ -199,7 +199,61 @@ try:
                 label.description = desc
                 label.save()
 
-        print("Successfully initialized all workspace projects, states, and labels!")
+        # 8. Disable public registration (Phase 4.10)
+        from plane.license.models import InstanceConfiguration
+        config, created = InstanceConfiguration.objects.get_or_create(key="ENABLE_SIGNUP")
+        config.value = "0"
+        config.save()
+        print("Disabled public registration (signup). Only invited users can register.")
+
+        # 9. Create Mock Users for RBAC testing (Phase 2F & 3C)
+        mock_users = [
+            ("member1@sentinel.local", "member1", "Tổ 6", "Member 1", 15, "PRJ6-Analytics"),
+            ("guest1@sentinel.local", "guest1", "Tổ 1", "Guest 1", 5, "PRJ1-Core")
+        ]
+
+        for email, username, first_name, last_name, role_val, project_name in mock_users:
+            user = User.objects.filter(email=email).first()
+            if not user:
+                user = User.objects.create_user(
+                    email=email,
+                    password="Sentinel@123",
+                    username=username,
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_email_verified=True
+                )
+                print(f"Created mock user: {email}")
+            else:
+                user.set_password("Sentinel@123")
+                user.first_name = first_name
+                user.last_name = last_name
+                user.save()
+
+            # Add to workspace
+            w_member, w_created = WorkspaceMember.objects.get_or_create(
+                workspace=workspace,
+                member=user,
+                defaults={"role": role_val}
+            )
+            if not w_created:
+                w_member.role = role_val
+                w_member.save()
+
+            # Add to project
+            proj = Project.objects.filter(workspace=workspace, name=project_name).first()
+            if proj:
+                p_member, p_created = ProjectMember.objects.get_or_create(
+                    project=proj,
+                    member=user,
+                    defaults={"role": role_val}
+                )
+                if not p_created:
+                    p_member.role = role_val
+                    p_member.save()
+                print(f"Assigned user {email} to project {project_name} as role {role_val}.")
+
+        print("Successfully initialized all workspace projects, states, labels, and RBAC mock members!")
 
 except Exception as e:
     import traceback

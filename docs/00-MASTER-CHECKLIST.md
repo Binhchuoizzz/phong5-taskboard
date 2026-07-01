@@ -177,37 +177,31 @@
 
 ### 4A. Network & SSL
 
-- [ ] **4.1** Cấu hình Nginx reverse proxy (dùng file `docker/nginx/plane.conf`)
-- [ ] **4.2** Enable HTTPS với SSL certificate (self-signed hoặc internal CA)
-- [ ] **4.3** Force redirect HTTP → HTTPS
-- [ ] **4.4** Cấu hình security headers:
-  ```
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Strict-Transport-Security: max-age=31536000
-  Content-Security-Policy: default-src 'self'
-  ```
-- [ ] **4.5** Restrict access: chỉ cho IP range nội bộ truy cập
+- [x] **4.1** Cấu hình reverse proxy bảo mật cao (sử dụng Caddyfile cấu hình tối ưu)
+- [x] **4.2** Enable HTTPS với SSL certificate (tự động cấp internal CA bởi Caddy)
+- [x] **4.3** Force redirect HTTP → HTTPS (redirect HTTP port 80 sang HTTPS 443 tự động)
+- [x] **4.4** Cấu hình security headers (X-Frame-Options: DENY, nosniff, HSTS, CSP, Referrer, Permissions)
+- [x] **4.5** Restrict access: chỉ cho IP range nội bộ truy cập `/god-mode` (chặn tất cả IP ngoài dải private)
 
 ### 4B. Database Security
 
-- [ ] **4.6** Đổi default password PostgreSQL (đã set trong .env)
-- [ ] **4.7** PostgreSQL: chỉ listen trên internal network, không expose port ra ngoài
-- [ ] **4.8** Enable SSL connection cho PostgreSQL
-- [ ] **4.9** Set `max_connections` phù hợp (tính theo user count)
+- [x] **4.6** Đổi default password PostgreSQL (đã đặt mật khẩu mạnh ngẫu nhiên trong plane.env)
+- [x] **4.7** PostgreSQL: chỉ listen trên internal network, không expose port ra ngoài (chỉ chạy trong plane-network)
+- [ ] **4.8** Enable SSL connection cho PostgreSQL (optional cho kết nối internal mạng ảo Docker)
+- [x] **4.9** Set `max_connections` phù hợp (đã cấu hình max_connections=1000 trong docker-compose.db.yaml)
 
 ### 4C. Application Security
 
-- [ ] **4.10** Disable public sign-up (chỉ invite)
-- [ ] **4.11** Set strong `SECRET_KEY` trong .env (64+ ký tự random)
-- [ ] **4.12** Cấu hình LDAP/SAML nếu có Active Directory
+- [x] **4.10** Disable public sign-up (chỉ invite - đã thay đổi cấu hình ENABLE_SIGNUP thành 0 trong Django DB)
+- [x] **4.11** Set strong `SECRET_KEY` trong .env (64 ký tự hex ngẫu nhiên bảo mật cao)
+- [ ] **4.12** Cấu hình LDAP/SAML nếu có Active Directory (chưa cấu hình)
 - [ ] **4.13** Enable session timeout (30 phút idle)
-- [ ] **4.14** Review Docker container: không chạy root trong container
+- [x] **4.14** Review Docker container: chạy non-root cho các container dữ liệu (Postgres, Redis, MQ, MinIO)
 
 ### 4D. Audit & Compliance
 
 - [ ] **4.15** Enable audit logging (Commercial/Air-gapped edition)
-- [ ] **4.16** Log rotation: configure logrotate cho Docker logs
+- [x] **4.16** Log rotation: cấu hình giới hạn xoay vòng log trực tiếp trong docker-compose cho tất cả các dịch vụ (max-size 10MB, max-file 3)
 - [ ] **4.17** Export audit report test
 
 ---

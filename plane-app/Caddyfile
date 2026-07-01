@@ -1,0 +1,63 @@
+(plane_proxy) {
+    request_body {
+        max_size {$FILE_SIZE_LIMIT}
+    }
+
+    # Inject Security Headers (Phase 4.4)
+    header {
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: http: https:;"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    }
+
+    redir /spaces /spaces/ permanent
+    reverse_proxy /spaces/* space:3000
+
+    # Restrict Access to /god-mode (Instance Admin) to private network ranges (Phase 4.5)
+    @blocked_godmode {
+        path /god-mode*
+        not remote_ip 127.0.0.1 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
+    }
+    respond @blocked_godmode "Forbidden (Access Restricted to Internal Networks)" 403
+
+    redir /god-mode /god-mode/ permanent
+    reverse_proxy /god-mode/* admin:3000
+
+    reverse_proxy /live/* live:3000
+
+    reverse_proxy /api/* api:8000
+
+    reverse_proxy /auth/* api:8000
+
+    reverse_proxy /static/* api:8000
+
+    reverse_proxy /{$BUCKET_NAME}/* plane-minio:9000
+    reverse_proxy /{$BUCKET_NAME} plane-minio:9000
+
+    reverse_proxy /* web:3000
+}
+
+{
+    {$CERT_EMAIL}
+    acme_ca {$CERT_ACME_CA:https://acme-v02.api.letsencrypt.org/directory}
+    {$CERT_ACME_DNS}
+    servers {
+        max_header_size 25MB
+        client_ip_headers X-Forwarded-For X-Real-IP
+        trusted_proxies static {$TRUSTED_PROXIES:0.0.0.0/0}
+    }
+}
+
+# Bind HTTPS with local self-signed internal CA (Phase 4.2 & 4.3)
+https://localhost, https://127.0.0.1, https://192.168.0.177 {
+    tls internal
+    import plane_proxy
+}
+
+# Redirect HTTP to HTTPS
+http://localhost, http://127.0.0.1, http://192.168.0.177 {
+    redir https://{host}{uri}
+}

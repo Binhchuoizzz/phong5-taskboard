@@ -13,6 +13,11 @@ services:
       - 9090:9090
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   grafana:
     image: grafana/grafana:11.0.0
@@ -26,6 +31,11 @@ services:
       - /home/binhchuoiz/Projects/Personal/NoteAppC12/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   node-exporter:
     image: prom/node-exporter:v1.8.1
@@ -35,6 +45,11 @@ services:
       - 9100:9100
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 
 

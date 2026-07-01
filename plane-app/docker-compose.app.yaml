@@ -9,6 +9,11 @@ services:
       - plane.env
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   space:
     image: makeplane/plane-space:${APP_RELEASE:-v1.3.1}
@@ -18,6 +23,11 @@ services:
       - plane.env
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   admin:
     image: makeplane/plane-admin:${APP_RELEASE:-v1.3.1}
@@ -27,6 +37,11 @@ services:
       - plane.env
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   live:
     image: makeplane/plane-live:${APP_RELEASE:-v1.3.1}
@@ -42,6 +57,11 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://plane-redis:6379/}
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
@@ -72,6 +92,11 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   worker:
     image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
@@ -100,6 +125,11 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   beat-worker:
     image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
@@ -128,6 +158,11 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   migrator:
     image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
@@ -156,6 +191,11 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-plane}
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   logs_api:

@@ -17,6 +17,7 @@ services:
     volumes:
       - proxy_config:/config
       - proxy_data:/data
+      - /home/binhchuoiz/Projects/Personal/NoteAppC12/plane-app/Caddyfile:/etc/caddy/Caddyfile
     env_file:
       - plane.env
     environment:
@@ -31,6 +32,11 @@ services:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     networks:
       - default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   proxy_config:
