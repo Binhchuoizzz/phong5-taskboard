@@ -59,16 +59,14 @@ fi
 
 # 2. Backup MinIO data
 echo -e "${BLUE}[2/4] Backing up MinIO storage...${NC}"
-# MinIO prebuilt stores in /export
-MINIO_DATA=$($DC_DB exec -T plane-minio ls /export 2>/dev/null)
-if [ -n "$MINIO_DATA" ]; then
-    $DC_DB exec -T plane-minio \
-        tar czf - /export 2>/dev/null \
-        > "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
+# Use docker cp because minio/minio image lacks tar utility
+if docker cp plane-app-plane-minio-1:/export "${BACKUP_DIR}/${BACKUP_NAME}/minio-data" 2>/dev/null; then
+    tar -czf "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" -C "${BACKUP_DIR}/${BACKUP_NAME}" minio-data 2>/dev/null
+    rm -rf "${BACKUP_DIR}/${BACKUP_NAME}/minio-data"
     SIZE=$(du -sh "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" | cut -f1)
     echo -e "  ${GREEN}✅ MinIO: ${SIZE}${NC}"
 else
-    echo "  ℹ️  MinIO empty, skipping"
+    echo "  ℹ️  MinIO container not found or empty, skipping"
     touch "${BACKUP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
 fi
 

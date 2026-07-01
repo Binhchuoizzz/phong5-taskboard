@@ -64,4 +64,3 @@ volumes:
 networks:
   default:
     name: plane-network
-    external: true

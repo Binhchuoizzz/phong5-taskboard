@@ -92,9 +92,9 @@ fi
 # 4. Restore MinIO
 echo -e "${BLUE}[4/5] Restoring MinIO storage...${NC}"
 if [ -f "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" ] && [ -s "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" ]; then
-    $DC_DB exec -T plane-minio \
-        tar xzf - -C / \
-        < "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz"
+    mkdir -p "${TEMP_DIR}/extracted-minio"
+    tar -xzf "${TEMP_DIR}/${BACKUP_NAME}/minio-data.tar.gz" -C "${TEMP_DIR}/extracted-minio" 2>/dev/null
+    docker cp "${TEMP_DIR}/extracted-minio/minio-data/." plane-app-plane-minio-1:/export
     echo -e "  ${GREEN}✅ MinIO data restored${NC}"
 else
     echo "  ℹ️  No MinIO data to restore (empty backup)"
