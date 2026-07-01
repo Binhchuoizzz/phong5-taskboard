@@ -61,9 +61,8 @@ echo -e "${GREEN}  ✅ plane-app/plane.env updated.${NC}"
 echo ""
 
 # Step 3: Setup Shared Docker Network
-echo -e "${BLUE}[3/6] Configuring Shared External Network...${NC}"
-docker network create plane-network 2>/dev/null || true
-echo -e "${GREEN}  ✅ External Network 'plane-network' ready.${NC}"
+echo -e "${BLUE}[3/6] Configuring Shared Network...${NC}"
+echo -e "${GREEN}  ✅ Network 'plane-network' will be managed natively by Compose.${NC}"
 echo ""
 
 # Step 4: Pull Docker Images
@@ -92,8 +91,23 @@ echo -e "${GREEN}  ✅ Migrations complete.${NC}"
 # C. Start Application Stack
 echo -e "  Starting Core Application Stack..."
 $DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" up -d
-echo "  Waiting 10 seconds for Application API to boot..."
-sleep 10
+echo "  Waiting for Application API to boot (port 8000)..."
+MAX_ATTEMPTS=30
+ATTEMPT=1
+while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+    if $DC_CMD -f "${PLANE_APP_DIR}/docker-compose.app.yaml" --env-file "${PLANE_APP_DIR}/plane.env" exec -T api python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/')" &>/dev/null; then
+        echo -e "${GREEN}  ✅ API is up and running!${NC}"
+        break
+    fi
+    echo "  Attempt $ATTEMPT/$MAX_ATTEMPTS: API not ready yet, retrying in 2s..."
+    sleep 2
+    ATTEMPT=$((ATTEMPT + 1))
+done
+
+if [ $ATTEMPT -gt $MAX_ATTEMPTS ]; then
+    echo -e "${RED}❌ Timeout waiting for API to boot.${NC}"
+    exit 1
+fi
 
 # D. Start Proxy and Monitor Stack
 echo -e "  Starting Reverse Proxy & Monitoring Stacks..."
