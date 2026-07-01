@@ -51,13 +51,13 @@
     }
 }
 
-# Bind HTTPS with local self-signed internal CA (Phase 4.2 & 4.3)
-https://localhost, https://127.0.0.1, https://192.168.0.177 {
-    tls internal
+# Bind plain HTTP for IP access (bypasses browser self-signed SSL block and SNI limitations)
+http://192.168.0.177, http://localhost, http://127.0.0.1 {
     import plane_proxy
 }
 
-# Redirect HTTP to HTTPS
-http://localhost, http://127.0.0.1, http://192.168.0.177 {
-    redir https://{host}{uri}
+# Bind HTTPS with local self-signed internal CA (for localhost only)
+https://localhost, https://127.0.0.1 {
+    tls internal
+    import plane_proxy
 }
