@@ -19,7 +19,7 @@
     # Restrict Access to /god-mode (Instance Admin) to private network ranges (Phase 4.5)
     @blocked_godmode {
         path /god-mode*
-        not remote_ip 127.0.0.1 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8
+        not remote_ip 127.0.0.1 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 100.64.0.0/10
     }
     respond @blocked_godmode "Forbidden (Access Restricted to Internal Networks)" 403
 
@@ -52,12 +52,12 @@
 }
 
 # Bind plain HTTP for IP access (bypasses browser self-signed SSL block and SNI limitations)
-http://192.168.0.177, http://localhost, http://127.0.0.1 {
+http://192.168.0.177, http://100.121.120.59, http://localhost, http://127.0.0.1 {
     import plane_proxy
 }
 
 # Bind HTTPS with local self-signed internal CA (for localhost only)
-https://localhost, https://127.0.0.1 {
+https://localhost, https://127.0.0.1, https://100.121.120.59 {
     tls internal
     import plane_proxy
 }
