@@ -1,0 +1,24 @@
+# CODEOWNERS — Auto-assign reviewers for Pull Requests
+# Syntax: <file-pattern>  <@github-username>
+# The owner(s) listed MUST approve any PR touching those files.
+
+# Default owner for everything
+*                               @Binhchuoizzz
+
+# Critical deployment scripts — always require owner review
+scripts/deploy-poc.sh           @Binhchuoizzz
+scripts/initialize-plane-data.py @Binhchuoizzz
+
+# Environment templates — must not introduce new secrets
+env/                            @Binhchuoizzz
+
+# Kubernetes configs (production-critical)
+k8s/                            @Binhchuoizzz
+
+# Security documents
+SECURITY.md                     @Binhchuoizzz
+docs/SYSTEM_SECURITY.md         @Binhchuoizzz
+docs/05-security.md             @Binhchuoizzz
+
+# Caddyfile / Proxy config
+plane-app/Caddyfile             @Binhchuoizzz

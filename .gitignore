@@ -1,38 +1,94 @@
-# Environment files with secrets
+# ============================================================
+# SECRETS & CREDENTIALS — NEVER COMMIT
+# ============================================================
 env/.env.local
 env/.env.production
+env/.env.staging
 *.env.local
 *.env.production
+*.env.staging
+.env
+.env.*
+!.env.example
 
-# Backup files
-/backup/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Logs
-*.log
-
-# Cloned dependencies and development stubs
-stubs/
-
-# Plane App secrets and downloads
+# Plane runtime secrets
 plane-app/plane.env
 plane-app/plane.env.bak
 plane-app/archive/
 
-# Python Virtual Environment
-.venv/
+# SSH keys / PKI
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+id_rsa
+id_ed25519
+*.pub
 
-# Python cache files
+# ============================================================
+# BACKUP & RUNTIME DATA
+# ============================================================
+/backup/
+/backups/
+*.dump
+*.sql.gz
+*.tar.gz
+*.zip
+
+# ============================================================
+# PYTHON
+# ============================================================
+.venv/
+venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ============================================================
+# NODE / FRONTEND (if ever added)
+# ============================================================
+node_modules/
+.next/
+.nuxt/
+dist/
+.parcel-cache/
+
+# ============================================================
+# IDE & OS
+# ============================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================================
+# LOGS & TEMP
+# ============================================================
+*.log
+logs/
+tmp/
+temp/
+
+# ============================================================
+# DOCKER RUNTIME (generated at runtime, not source)
+# ============================================================
+plane-app/uploads/
+plane-app/minio/
+
+# ============================================================
+# DEVELOPMENT STUBS (local vendored Plane source)
+# ============================================================
+stubs/
