@@ -60,12 +60,37 @@ x-app-env: &app-env
   LIVE_SERVER_SECRET_KEY: ${LIVE_SERVER_SECRET_KEY:-2FiJk1U2aiVPEQtzLehYGlTSnTnrs7LW}
   WEBHOOK_ALLOWED_IPS: ${WEBHOOK_ALLOWED_IPS:-}
   WEBHOOK_ALLOWED_HOSTS: ${WEBHOOK_ALLOWED_HOSTS:-}
+  
+  # Notifications & Integration Configs
+  EMAIL_HOST: ${EMAIL_HOST:-}
+  EMAIL_PORT: ${EMAIL_PORT:-587}
+  EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+  EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+  EMAIL_USE_TLS: ${EMAIL_USE_TLS:-1}
+  EMAIL_USE_SSL: ${EMAIL_USE_SSL:-0}
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@sentinel.local}
+  ENABLE_LDAP: ${ENABLE_LDAP:-0}
+  LDAP_SERVER_URL: ${LDAP_SERVER_URL:-}
+  LDAP_BIND_DN: ${LDAP_BIND_DN:-}
+  LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD:-}
+  LDAP_USER_SEARCH_BASE: ${LDAP_USER_SEARCH_BASE:-}
+  LDAP_USER_SEARCH_FILTER: ${LDAP_USER_SEARCH_FILTER:-(sAMAccountName=%(user)s)}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+  GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+  GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
 
 services:
   web:
-    image: makeplane/plane-frontend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/web/Dockerfile.web
     deploy:
       replicas: ${WEB_REPLICAS:-1}
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
       restart_policy:
         condition: any
     depends_on:
@@ -73,7 +98,9 @@ services:
       - worker
 
   space:
-    image: makeplane/plane-space:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/space/Dockerfile.space
     deploy:
       replicas: ${SPACE_REPLICAS:-1}
       restart_policy:
@@ -84,7 +111,9 @@ services:
       - web
 
   admin:
-    image: makeplane/plane-admin:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/admin/Dockerfile.admin
     deploy:
       replicas: ${ADMIN_REPLICAS:-1}
       restart_policy:
@@ -94,7 +123,9 @@ services:
       - web
 
   live:
-    image: makeplane/plane-live:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/live/Dockerfile.live
     environment:
       <<: [*live-env, *redis-env]
     deploy:
@@ -106,10 +137,16 @@ services:
       - web
 
   api:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-api.sh
     deploy:
       replicas: ${API_REPLICAS:-1}
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
       restart_policy:
         condition: any
     volumes:
@@ -122,7 +159,9 @@ services:
       - plane-mq
 
   worker:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-worker.sh
     deploy:
       replicas: ${WORKER_REPLICAS:-1}
@@ -139,7 +178,9 @@ services:
       - plane-mq
 
   beat-worker:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-beat.sh
     deploy:
       replicas: ${BEAT_WORKER_REPLICAS:-1}
@@ -156,7 +197,9 @@ services:
       - plane-mq
 
   migrator:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-migrator.sh
     deploy:
       replicas: 1
@@ -176,6 +219,10 @@ services:
     command: postgres -c 'max_connections=1000'
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
       restart_policy:
         condition: any
     environment:
@@ -218,7 +265,9 @@ services:
 
   # Comment this if you already have a reverse proxy running
   proxy:
-    image: makeplane/plane-proxy:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/proxy
+      dockerfile: Dockerfile.ce
     deploy:
       replicas: 1
       restart_policy:
@@ -237,6 +286,7 @@ services:
     volumes:
       - proxy_config:/config
       - proxy_data:/data
+      - ./Caddyfile:/etc/caddy/Caddyfile
     depends_on:
       - web
       - api

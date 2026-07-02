@@ -150,7 +150,7 @@ echo ""
 echo -e "${BLUE}[Database]${NC}"
 # ============================================================
 
-db_check=$($DC_CMD_ALL exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" -T plane-db psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
+db_check=$(docker exec -e PGPASSWORD="${POSTGRES_PASSWORD:-}" $($DC_CMD_ALL ps -q plane-db) psql -U plane -d plane -c "SELECT COUNT(*) FROM information_schema.tables;" 2>/dev/null || echo "FAIL")
 if echo "$db_check" | grep -q "[0-9]"; then
     check_pass "PostgreSQL connection OK"
 else
