@@ -137,13 +137,12 @@ try:
                 ]
             else: # General projects
                 states = [
-                    ("Backlog", "#60646C", "backlog", True),
-                    ("Todo", "#60646C", "unstarted", False),
-                    ("In Progress", "#F59E0B", "started", False),
-                    ("In Review", "#8B5CF6", "started", False),
-                    ("Testing", "#3B82F6", "started", False),
-                    ("Done", "#46A758", "completed", False),
-                    ("Cancelled", "#9AA4BC", "cancelled", False),
+                    ("Tiếp nhận", "#60646C", "backlog", True),
+                    ("Phân công", "#3B82F6", "unstarted", False),
+                    ("Đang xử lý", "#F59E0B", "started", False),
+                    ("Chờ phối hợp", "#8B5CF6", "started", False),
+                    ("Chờ duyệt", "#EC4899", "started", False),
+                    ("Hoàn thành", "#10B981", "completed", False),
                 ]
 
             # Clear existing states for this project to make sure the workflows match exactly
@@ -173,14 +172,12 @@ try:
             ("P2-Medium", "#EAB308", "Priority: Medium Severity"),
             ("P3-Low", "#22C55E", "Priority: Low Severity"),
             # Type
-            ("Bug", "#EF4444", "Software defects or system issues"),
-            ("Feature", "#3B82F6", "New requests or enhancements"),
-            ("Incident", "#F43F5E", "Security incidents"),
-            ("Audit", "#8B5CF6", "System audits"),
-            ("Compliance", "#EC4899", "Policy & Compliance"),
-            ("Research", "#10B981", "R&D activities"),
-            ("Deployment", "#06B6D4", "Production deployment tasks"),
-            ("Task", "#6B7280", "General tasks"),
+            ("Chỉ đạo", "#EF4444", "Nhiệm vụ chỉ đạo từ Lãnh đạo"),
+            ("Sự cố", "#F43F5E", "Xử lý sự cố ATTT"),
+            ("Kiểm tra", "#8B5CF6", "Kiểm tra, giám sát hệ thống"),
+            ("Kế hoạch", "#3B82F6", "Thực hiện theo kế hoạch định kỳ"),
+            ("Báo cáo", "#10B981", "Báo cáo tổng kết, chuyên đề"),
+            ("Task", "#6B7280", "Nhiệm vụ chung"),
             # Security
             ("Confidential", "#EF4444", "Highly confidential information"),
             ("Internal", "#F97316", "Internal use only"),
