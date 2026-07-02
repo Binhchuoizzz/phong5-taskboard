@@ -1,0 +1,4 @@
+[submodule "plane-src"]
+	path = plane-src
+	url = https://github.com/makeplane/plane.git
+	branch = master

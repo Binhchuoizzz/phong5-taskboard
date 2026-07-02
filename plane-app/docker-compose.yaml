@@ -63,7 +63,9 @@ x-app-env: &app-env
 
 services:
   web:
-    image: makeplane/plane-frontend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/web/Dockerfile.web
     deploy:
       replicas: ${WEB_REPLICAS:-1}
       restart_policy:
@@ -73,7 +75,9 @@ services:
       - worker
 
   space:
-    image: makeplane/plane-space:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/space/Dockerfile.space
     deploy:
       replicas: ${SPACE_REPLICAS:-1}
       restart_policy:
@@ -84,7 +88,9 @@ services:
       - web
 
   admin:
-    image: makeplane/plane-admin:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/admin/Dockerfile.admin
     deploy:
       replicas: ${ADMIN_REPLICAS:-1}
       restart_policy:
@@ -94,7 +100,9 @@ services:
       - web
 
   live:
-    image: makeplane/plane-live:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/live/Dockerfile.live
     environment:
       <<: [*live-env, *redis-env]
     deploy:
@@ -106,7 +114,9 @@ services:
       - web
 
   api:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-api.sh
     deploy:
       replicas: ${API_REPLICAS:-1}
@@ -122,7 +132,9 @@ services:
       - plane-mq
 
   worker:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-worker.sh
     deploy:
       replicas: ${WORKER_REPLICAS:-1}
@@ -139,7 +151,9 @@ services:
       - plane-mq
 
   beat-worker:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-beat.sh
     deploy:
       replicas: ${BEAT_WORKER_REPLICAS:-1}
@@ -156,7 +170,9 @@ services:
       - plane-mq
 
   migrator:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     command: ./bin/docker-entrypoint-migrator.sh
     deploy:
       replicas: 1
@@ -218,7 +234,9 @@ services:
 
   # Comment this if you already have a reverse proxy running
   proxy:
-    image: makeplane/plane-proxy:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/proxy
+      dockerfile: Dockerfile.ce
     deploy:
       replicas: 1
       restart_policy:

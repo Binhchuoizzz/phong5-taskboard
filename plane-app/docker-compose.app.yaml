@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   web:
-    image: makeplane/plane-frontend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/web/Dockerfile.web
     container_name: plane-app-web-1
     restart: always
     volumes:
@@ -18,7 +20,9 @@ services:
         max-file: "3"
 
   space:
-    image: makeplane/plane-space:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/space/Dockerfile.space
     container_name: plane-app-space-1
     restart: always
     env_file:
@@ -32,7 +36,9 @@ services:
         max-file: "3"
 
   admin:
-    image: makeplane/plane-admin:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/admin/Dockerfile.admin
     container_name: plane-app-admin-1
     restart: always
     volumes:
@@ -48,7 +54,9 @@ services:
         max-file: "3"
 
   live:
-    image: makeplane/plane-live:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src
+      dockerfile: apps/live/Dockerfile.live
     container_name: plane-app-live-1
     restart: always
     env_file:
@@ -69,7 +77,9 @@ services:
         max-file: "3"
 
   api:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     container_name: plane-app-api-1
     command: ./bin/docker-entrypoint-api.sh
     restart: always
@@ -101,7 +111,9 @@ services:
         max-file: "3"
 
   worker:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     container_name: plane-app-worker-1
     command: ./bin/docker-entrypoint-worker.sh
     restart: always
@@ -131,7 +143,9 @@ services:
         max-file: "3"
 
   beat-worker:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     container_name: plane-app-beat-worker-1
     command: ./bin/docker-entrypoint-beat.sh
     restart: always
@@ -161,7 +175,9 @@ services:
         max-file: "3"
 
   migrator:
-    image: makeplane/plane-backend:${APP_RELEASE:-v1.3.1}
+    build:
+      context: ../plane-src/apps/api
+      dockerfile: Dockerfile.api
     container_name: plane-app-migrator-1
     command: ./bin/docker-entrypoint-migrator.sh
     restart: on-failure
